@@ -1,4 +1,3 @@
-#ifdef LUA
 #include "catalua_impl.h"
 
 #include "catalua_bindings.h"
@@ -19,6 +18,7 @@ sol::state make_lua_state()
 
     lua.open_libraries(
         sol::lib::base,
+        sol::lib::package,
         sol::lib::math,
         sol::lib::string,
         sol::lib::table
@@ -274,5 +274,3 @@ bool compare_tables( sol::table a, sol::table b )
     }
     return are_equal;
 }
-
-#endif

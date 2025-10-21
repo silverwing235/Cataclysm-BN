@@ -8,8 +8,8 @@
       "terrain": {
         "t_region_groundcover": { "t_grass": 12, "t_grass_dead": 2, "t_dirt": 1 },
         "t_region_groundcover_urban": { "t_grass": 20, "t_grass_dead": 3 },
-        "t_region_groundcover_forest": { "t_grass_long": 5, "t_grass_tall": 1, "t_moss": 1, "t_grass_dead": 3 },
-        "t_region_groundcover_swamp": { "t_grass_long": 90, "t_grass_tall": 30, "t_moss": 60, "t_dirt": 60, "t_bog_iron": 1 },
+        "t_region_groundcover_forest": { "t_grass_long": 10, "t_grass_tall": 1, "t_moss": 2, "t_grass_dead": 7 },
+        "t_region_groundcover_swamp": { "t_grass_long": 100, "t_grass_tall": 10, "t_moss": 60, "t_dirt": 70, "t_bog_iron": 1 },
         "t_region_groundcover_barren": { "t_dirt": 30, "t_grass_dead": 2, "t_railroad_rubble": 1 },
         "t_region_grass": { "t_grass": 1 },
         "t_region_soil": { "t_dirt": 1 },
@@ -780,6 +780,7 @@
         "pool_6": 20,
         "skate_park_ramp": 50,
         "skate_park": 50,
+        "vending_park": 70,
         "small_wooded_trail": 300,
         "pavilion": 100,
         "pavilion_1": 100,
@@ -803,7 +804,8 @@
         "cs_public_art_piece": 100,
         "cs_public_space": 100,
         "cs_city_dump_small": 100,
-        "cs_open_sewer": 100
+        "cs_open_sewer": 100,
+        "trailerpark_city": 10
       },
       "shops": {
         "bus_station": 200,
@@ -927,6 +929,7 @@
         "s_jewelry_shop": 200,
         "s_antique": 200,
         "s_gardening": 200,
+        "s_dive_shop": 200,
         "museum": 100,
         "s_music": 200,
         "s_laundromat": 100,
@@ -1020,6 +1023,19 @@
         "homeless_shelter": 100,
         "parking_garage": 200,
         "afs_augmentation_clinic_1": 200
+      },
+      "finales": {
+        "s_electronics_2": 200,
+        "s_gun_2": 200,
+        "megastore": 200,
+        "town_hall": 200,
+        "police_1": 200,
+        "s_gun_1": 200,
+        "fire_station": 100,
+        "hospital": 100,
+        "house_prepper": 50,
+        "office_tower_hiddenlab": 50,
+        "pawn_pf": 50
       }
     },
     "weather": {

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_MAP_H
-#define CATA_SRC_MAP_H
 
 #include <array>
 #include <bitset>
@@ -528,10 +526,10 @@ class map
 
         maptile maptile_at( const tripoint &p ) const;
         maptile maptile_at( const tripoint &p );
-    private:
-        // Versions of the above that don't do bounds checks
         maptile maptile_at_internal( const tripoint &p ) const;
         maptile maptile_at_internal( const tripoint &p );
+    private:
+        // Versions of the above that don't do bounds checks
         std::pair<tripoint, maptile> maptile_has_bounds( const tripoint &p, bool bounds_checked );
         std::array<std::pair<tripoint, maptile>, 8> get_neighbors( const tripoint &p );
         void spread_gas( field_entry &cur, const tripoint &p, int percent_spread,
@@ -561,6 +559,12 @@ class map
         int move_cost( point p, const vehicle *ignored_vehicle = nullptr ) const {
             return move_cost( tripoint( p, abs_sub.z ), ignored_vehicle );
         }
+        /**
+         * Internal versions of public functions to avoid checking same variables multiple times.
+         * They lack safety checks, because their callers already do those.
+         */
+        int move_cost_internal( const furn_t &furniture, const ter_t &terrain,
+                                const vehicle *veh, int vpart ) const;
         bool impassable( const tripoint &p ) const;
         bool impassable( point p ) const {
             return !passable( p );
@@ -734,7 +738,7 @@ class map
         vehicle *veh_at_internal( const tripoint &p, int &part_num );
         const vehicle *veh_at_internal( const tripoint &p, int &part_num ) const;
         // Put player on vehicle at x,y
-        void board_vehicle( const tripoint &p, player *pl );
+        void board_vehicle( const tripoint &p, Character *pl );
         // Remove given passenger from given vehicle part.
         // If dead_passenger, then null passenger is acceptable.
         void unboard_vehicle( const vpart_reference &, Character *passenger,
@@ -889,7 +893,7 @@ class map
          * Calls the examine function of furniture or terrain at given tile, for given character.
          * Will only examine terrain if furniture had @ref iexamine::none as the examine function.
          */
-        void examine( Character &p, const tripoint &pos );
+        void examine( Character &who, const tripoint &pos );
 
         /**
          * Returns true if point at pos is harvestable right now, with no extra tools.
@@ -995,6 +999,10 @@ class map
         int bash_rating( const int str, point p ) const {
             return bash_rating( str, tripoint( p, abs_sub.z ) );
         }
+        int bash_rating_internal( int str, const furn_t &furniture,
+                                  const ter_t &terrain, bool allow_floor,
+                                  const vehicle *veh, int part ) const;
+
 
         // Rubble
         /** Generates rubble at the given location, if overwrite is true it just writes on top of what currently exists
@@ -1243,6 +1251,13 @@ class map
         detached_ptr<item> add_item_or_charges( point p, detached_ptr<item> &&obj, bool overflow = true ) {
             return add_item_or_charges( tripoint( p, abs_sub.z ), std::move( obj ), overflow );
         }
+
+        /**
+         * Checks for spawn_rate value for item category of 'itm'.
+         * If spawn_rate is less than 1.0, it will make a random roll (0.1-1.0) to check if the item will have a chance to spawn.
+         * If spawn_rate is more than or equal to 1.0, it will make item spawn that many times (using roll_remainder).
+        */
+        float item_category_spawn_rate( const item &itm );
 
         /**
          * Place an item on the map, despite the parameter name, this is not necessarily a new item.
@@ -1516,7 +1531,7 @@ class map
 
         // Returns true if terrain at p has NO flag TFLAG_NO_FLOOR,
         // if we're not in z-levels mode or if we're at lowest level
-        bool has_floor( const tripoint &p ) const;
+        bool has_floor( const tripoint &p, bool visible_only = false ) const;
 
         /** Checks if there's a floor between the two tiles. They must be at most 1 tile away from each other in any dimension.
          *  If they're not at the same xy coord there must be floor on both of the relevant tiles
@@ -1796,7 +1811,7 @@ class map
     protected:
         void generate_lightmap( int zlev );
         void build_seen_cache( const tripoint &origin, int target_z );
-        void apply_character_light( Character &p );
+        void apply_character_light( Character &who );
 
         //Adds/removes player specific transparencies
         void apply_vision_transparency_cache( const tripoint &center, int target_z,
@@ -1825,7 +1840,7 @@ class map
          */
         void set_abs_sub( const tripoint &p );
 
-    private:
+    public:
         field &get_field( const tripoint &p );
 
         /**
@@ -1888,16 +1903,6 @@ class map
         void invalidate_max_populated_zlev( int zlev );
 
         /**
-         * Internal versions of public functions to avoid checking same variables multiple times.
-         * They lack safety checks, because their callers already do those.
-         */
-        int move_cost_internal( const furn_t &furniture, const ter_t &terrain,
-                                const vehicle *veh, int vpart ) const;
-        int bash_rating_internal( int str, const furn_t &furniture,
-                                  const ter_t &terrain, bool allow_floor,
-                                  const vehicle *veh, int part ) const;
-
-        /**
          * Internal version of the drawsq. Keeps a cached maptile for less re-getting.
          * Returns false if it has drawn all it should, true if `draw_from_above` should be called after.
          */
@@ -1936,13 +1941,11 @@ class map
         bash_results bash_ter_success( const tripoint &p, const bash_params &params );
         bash_results bash_furn_success( const tripoint &p, const bash_params &params );
 
-    private:
         // Gets the roof type of the tile at p
         // Second argument refers to whether we have to get a roof (we're over an unpassable tile)
         // or can just return air because we bashed down an entire floor tile
         ter_id get_roof( const tripoint &p, bool allow_air ) const;
 
-    public:
         void process_items();
     private:
         // Iterates over every item on the map, passing each item to the provided function.
@@ -2103,4 +2106,4 @@ class fake_map : public tinymap
                   int fake_map_z );
         ~fake_map() override;
 };
-#endif // CATA_SRC_MAP_H
+

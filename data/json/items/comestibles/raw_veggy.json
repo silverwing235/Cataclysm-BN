@@ -2,6 +2,7 @@
   {
     "type": "COMESTIBLE",
     "id": "barley",
+    "category": "cooking_ingredients",
     "name": { "str": "barley" },
     "weight": "211 g",
     "color": "brown",
@@ -24,6 +25,7 @@
   {
     "type": "COMESTIBLE",
     "id": "bee_balm",
+    "category": "cooking_ingredients",
     "name": { "str": "bee balm" },
     "description": "A snow-white flower also known as wild bergamot.  Smells faintly of mint.",
     "comestible_type": "FOOD",
@@ -62,6 +64,7 @@
   {
     "type": "COMESTIBLE",
     "id": "buckwheat",
+    "category": "cooking_ingredients",
     "name": { "str_sp": "buckwheat" },
     "weight": "180 g",
     "color": "brown",
@@ -253,7 +256,7 @@
     "type": "COMESTIBLE",
     "id": "cotton_boll",
     "name": { "str": "cotton boll" },
-    "category": "other",
+    "category": "scrap_fabric",
     "weight": "26 g",
     "color": "light_green",
     "comestible_type": "FOOD",
@@ -389,6 +392,7 @@
   {
     "type": "COMESTIBLE",
     "id": "dogbane",
+    "category": "other",
     "name": "dogbane",
     "description": "A stalk of dogbane.  It has very fibrous stems and is mildly poisonous.",
     "comestible_type": "FOOD",
@@ -431,6 +435,7 @@
   {
     "type": "COMESTIBLE",
     "id": "hops",
+    "category": "cooking_ingredients",
     "name": { "str": "hops flower" },
     "weight": "92 g",
     "color": "light_green",
@@ -492,6 +497,7 @@
   {
     "type": "COMESTIBLE",
     "id": "mugwort",
+    "category": "cooking_ingredients",
     "name": "mugwort",
     "description": "A stalk of mugwort.  Smells wonderful.",
     "comestible_type": "FOOD",
@@ -724,6 +730,7 @@
   {
     "type": "COMESTIBLE",
     "id": "tea_raw",
+    "category": "cooking_ingredients",
     "name": { "str": "tea leaf", "str_pl": "tea leaves" },
     "weight": "2 g",
     "color": "green",
@@ -747,6 +754,7 @@
   {
     "type": "COMESTIBLE",
     "id": "coca_leaf",
+    "category": "drugs",
     "looks_like": "raw_edamame",
     "name": { "str": "coca leaf", "str_pl": "coca leaves" },
     "weight": "2 g",
@@ -806,7 +814,7 @@
     "price": "6 USD",
     "price_postapoc": "50 cent",
     "material": [ "veggy" ],
-    "flags": [ "TRADER_AVOID", "SMOKABLE", "RAW" ],
+    "flags": [ "TRADER_AVOID", "SMOKABLE", "RAW", "NO_COOKING_BUFF" ],
     "smoking_result": "dry_veggy",
     "volume": "250 ml",
     "vitamins": [ [ "vitA", 16 ], [ "vitC", 36 ], [ "calcium", 4 ], [ "iron", 4 ], [ "veggy_allergen", 1 ] ]
@@ -861,6 +869,7 @@
   {
     "type": "COMESTIBLE",
     "id": "canola",
+    "category": "cooking_ingredients",
     "name": "canola",
     "description": "A pretty stalk of canola.  Its seeds can be pressed into oil.",
     "comestible_type": "FOOD",
@@ -957,8 +966,30 @@
     "material": [ "veggy" ],
     "volume": "250 ml",
     "fun": -3,
-    "flags": [ "RAW" ],
+    "flags": [ "RAW", "NO_COOKING_BUFF" ],
     "milling": { "into": "flour", "conversion_rate": 5 },
     "vitamins": [ [ "vitC", 5 ], [ "calcium", 3 ], [ "iron", 9 ], [ "veggy_allergen", 1 ] ]
+  },
+  {
+    "type": "COMESTIBLE",
+    "id": "lake_greens",
+    "name": { "str_sp": "aquatic greens" },
+    "weight": "100 g",
+    "color": "light_green",
+    "looks_like": "horseradish_greens",
+    "spoils_in": "7 days",
+    "comestible_type": "FOOD",
+    "symbol": "%",
+    "healthy": 1,
+    "description": "Shoots and leaves from underwater plants, such as hornwort or pondweed.  A bit like raw seaweed.",
+    "price": "80 cent",
+    "material": [ "veggy" ],
+    "volume": "250 ml",
+    "fun": -2,
+    "flags": [ "SMOKABLE", "RAW" ],
+    "smoking_result": "dry_veggy",
+    "//": "Based off raw seaweed, per aquacalc",
+    "calories": 38,
+    "vitamins": [ [ "vitA", 8 ], [ "vitC", 15 ], [ "calcium", 7 ], [ "iron", 21 ], [ "veggy_allergen", 1 ] ]
   }
 ]

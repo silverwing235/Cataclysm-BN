@@ -65,6 +65,7 @@
 #include "rng.h"
 #include "sdl_wrappers.h"
 #include "sdl_geometry.h"
+#include "sdl_utils.h"
 #include "sdl_font.h"
 #include "sdlsound.h"
 #include "string_formatter.h"
@@ -102,7 +103,8 @@
 //Globals                           *
 //***********************************
 
-std::unique_ptr<cata_tiles> tilecontext;
+std::shared_ptr<cata_tiles> tilecontext;
+std::shared_ptr<cata_tiles> overmap_tilecontext;
 static uint32_t lastupdate = 0;
 static uint32_t interval = 25;
 static bool needupdate = false;
@@ -689,13 +691,18 @@ void clear_window_area( const catacurses::window &win_ )
 static std::optional<std::pair<tripoint_abs_omt, std::string>> get_mission_arrow(
             const inclusive_cuboid<tripoint> &overmap_area, const tripoint_abs_omt &center )
 {
-    if( get_avatar().get_active_mission() == nullptr ) {
+    const auto *mission = get_avatar().get_active_mission();
+    const bool custom_waypoint_valid = get_avatar().get_custom_mission_target() !=
+                                       overmap::invalid_tripoint;
+    if( mission == nullptr && !custom_waypoint_valid ) {
         return std::nullopt;
     }
-    if( !get_avatar().get_active_mission()->has_target() ) {
+    if( ( mission == nullptr || !mission->has_target() ) && !custom_waypoint_valid ) {
         return std::nullopt;
     }
-    const tripoint_abs_omt mission_target = get_avatar().get_active_mission_target();
+    tripoint_abs_omt mission_target = custom_waypoint_valid
+                                      ? get_avatar().get_custom_mission_target()
+                                      : get_avatar().get_active_mission_target();  // Safe here because mission is non-null
 
     std::string mission_arrow_variant;
     if( overmap_area.contains( mission_target.raw() ) ) {
@@ -859,22 +866,22 @@ void cata_tiles::draw_om( point dest, const tripoint_abs_omt &center_abs_omt, bo
         geometry->rect( renderer, clipRect, SDL_Color() );
     }
 
+    point s;
+    get_window_tile_counts( width, height, s.x, s.y );
+
     op = point( dest.x * fontwidth, dest.y * fontheight );
     // Rounding up to include incomplete tiles at the bottom/right edges
     screentile_width = divide_round_up( width, tile_width );
     screentile_height = divide_round_up( height, tile_height );
 
-    window_dimensions wnd_dim = get_window_dimensions( g->w_overmap );
-
     const int min_col = 0;
-    const int max_col = screentile_width;
+    const int max_col = s.x;
     const int min_row = 0;
-    const int max_row = screentile_height;
+    const int max_row = s.y;
     int height_3d = 0;
     avatar &you = get_avatar();
     const tripoint_abs_omt avatar_pos = you.global_omt_location();
-    const tripoint_abs_omt corner_NW = center_abs_omt - point( wnd_dim.window_size_cell.x / 2,
-                                       wnd_dim.window_size_cell.y / 2 );
+    const tripoint_abs_omt corner_NW = center_abs_omt - point( max_col / 2, max_row / 2 );
     const tripoint_abs_omt corner_SE = corner_NW + point( max_col - 1, max_row - 1 );
     const inclusive_cuboid<tripoint> overmap_area( corner_NW.raw(), corner_SE.raw() );
     // Debug vision allows seeing everything
@@ -919,10 +926,38 @@ void cata_tiles::draw_om( point dest, const tripoint_abs_omt &center_abs_omt, bo
                 }
             }
 
-            const lit_level ll = overmap_buffer.is_explored( omp ) ? lit_level::LOW : lit_level::LIT;
-            // light level is now used for choosing between grayscale filter and normal lit tiles.
-            draw_from_id_string( id, TILE_CATEGORY::C_OVERMAP_TERRAIN, "overmap_terrain", omp.raw(),
-                                 subtile, rotation, ll, false, height_3d, 0 );
+            if( overmap_transparency ) {
+                int z_offset = 0;
+                while( id == "open_air" ) {
+                    z_offset++;
+                    const tripoint_abs_omt lower_omp = omp + tripoint( 0, 0, -z_offset );
+                    const bool lower_see = has_debug_vision || overmap_buffer.seen( lower_omp );
+                    if( !lower_see ) {
+                        //actually really strange situation when above overmap is explored, but below one isn't
+                        //so let's account for this just in case, drawing highest seen tile
+                        z_offset--;
+                        break;
+                    }
+                    id = get_omt_id_rotation_and_subtile( lower_omp, rotation, subtile );
+                }
+                draw_om_tile_recursively( omp + tripoint( 0, 0, -z_offset ), id, rotation, subtile, z_offset );
+            } else {
+                const lit_level ll = overmap_buffer.is_explored( omp ) ? lit_level::LOW : lit_level::LIT;
+                // light level is now used for choosing between grayscale filter and normal lit tiles.
+                draw_from_id_string( id, TILE_CATEGORY::C_OVERMAP_TERRAIN, "overmap_terrain", omp.raw(),
+                                     subtile, rotation, ll, false, height_3d, 0 );
+            }
+
+            if( blink && uistate.overmap_highlighted_omts.contains( omp ) ) {
+                if( tile_iso ) {
+                    draw_from_id_string( "highlight", omp.raw(), 0, 0, lit_level::LIT, false, 0 );
+                } else {
+                    SDL_Color c = curses_color_to_SDL( c_pink );
+                    c.a = c.a >> 1;
+                    auto p = player_to_screen( omp.raw().xy() );
+                    draw_color_at( c, p, SDL_BLENDMODE_BLEND );
+                }
+            }
 
             if( see ) {
                 if( blink && uistate.overmap_debug_mongroup ) {
@@ -1378,6 +1413,18 @@ static bool draw_window( Font_Ptr &font, const catacurses::window &w, point offs
                 case LINE_XXXX_UNICODE:
                     uc = LINE_XXXX_C;
                     break;
+                case LINE_XDXO_UNICODE:
+                    uc = LINE_XDXO_C;
+                    break;
+                case LINE_DXOX_UNICODE:
+                    uc = LINE_DXOX_C;
+                    break;
+                case LINE_XOXD_UNICODE:
+                    uc = LINE_XOXD_C;
+                    break;
+                case LINE_OXDX_UNICODE:
+                    uc = LINE_OXDX_C;
+                    break;
                 case UNKNOWN_UNICODE:
                     use_draw_ascii_lines_routine = true;
                     break;
@@ -1532,7 +1579,8 @@ void cata_cursesport::curses_drawwindow( const catacurses::window &w )
         // Special font for the terrain window
         update = draw_window( map_font, w );
     } else if( g && w == g->w_overmap && use_tiles && use_tiles_overmap ) {
-        tilecontext->draw_om( win->pos, overmap_ui::redraw_info.center, overmap_ui::redraw_info.blink );
+        overmap_tilecontext->draw_om( win->pos, overmap_ui::redraw_info.center,
+                                      overmap_ui::redraw_info.blink );
         update = true;
     } else if( g && w == g->w_overmap && overmap_font ) {
         // Special font for the terrain window
@@ -3540,11 +3588,13 @@ void catacurses::init_interface()
     WinCreate();
 
     dbg( DL::Info ) << "Initializing SDL Tiles context";
-    tilecontext = std::make_unique<cata_tiles>( renderer, geometry );
+    tilecontext = std::make_shared<cata_tiles>( renderer, geometry );
+    const auto tilesName = get_option<std::string>( "TILES" );
+    const auto omTilesName = get_option<std::string>( "OVERMAP_TILES" );
     try {
         std::vector<mod_id> dummy;
         tilecontext->load_tileset(
-            get_option<std::string>( "TILES" ),
+            tilesName,
             dummy,
             /*precheck=*/true,
             /*force=*/false,
@@ -3557,7 +3607,27 @@ void catacurses::init_interface()
         // Setting it to false disables this from getting used.
         use_tiles = false;
     }
-
+    if( tilesName == omTilesName ) {
+        overmap_tilecontext = tilecontext;
+    } else {
+        try {
+            overmap_tilecontext = std::make_shared<cata_tiles>( renderer, geometry );
+            std::vector<mod_id> dummy;
+            overmap_tilecontext->load_tileset(
+                omTilesName,
+                dummy,
+                /*precheck=*/true,
+                /*force=*/false,
+                /*pump_events=*/true
+            );
+        } catch( const std::exception &err ) {
+            dbg( DL::Error ) << "failed to check for overmap tileset: " << err.what();
+            // use_tiles is the cached value of the USE_TILES option.
+            // most (all?) code refers to this to see if cata_tiles should be used.
+            // Setting it to false disables this from getting used.
+            use_tiles = false;
+        }
+    }
     color_loader<SDL_Color>().load( windowsPalette );
     init_colors();
 
@@ -3588,8 +3658,10 @@ void load_tileset()
     if( !tilecontext || !use_tiles ) {
         return;
     }
+    const auto tilesName = get_option<std::string>( "TILES" );
+    const auto omTilesName = get_option<std::string>( "OVERMAP_TILES" );
     tilecontext->load_tileset(
-        get_option<std::string>( "TILES" ),
+        tilesName,
         world_generator->active_world->info->active_mod_order,
         /*precheck=*/false,
         /*force=*/false,
@@ -3598,12 +3670,31 @@ void load_tileset()
     tilecontext->do_tile_loading_report( []( const std::string & str ) {
         DebugLog( DL::Info, DC::Main ) << str;
     } );
+
+    if( tilesName == omTilesName ) {
+        overmap_tilecontext = tilecontext;
+    } else {
+        if( overmap_tilecontext ) {
+            overmap_tilecontext = std::make_shared<cata_tiles>( renderer, geometry );
+            overmap_tilecontext->load_tileset(
+                omTilesName,
+                world_generator->active_world->info->active_mod_order,
+                /*precheck=*/false,
+                /*force=*/false,
+                /*pump_events=*/true
+            );
+            overmap_tilecontext->do_tile_loading_report( []( const std::string & str ) {
+                DebugLog( DL::Info, DC::Main ) << str;
+            } );
+        }
+    }
 }
 
 //Ends the terminal, destroy everything
 void catacurses::endwin()
 {
     tilecontext.reset();
+    overmap_tilecontext.reset();
     font.reset();
     map_font.reset();
     overmap_font.reset();
@@ -3706,7 +3797,7 @@ bool gamepad_available()
     return joystick != nullptr;
 }
 
-void rescale_tileset( int size )
+void rescale_tileset( float size )
 {
     tilecontext->set_draw_scale( size );
 }
@@ -3726,8 +3817,8 @@ static window_dimensions get_window_dimensions( const catacurses::window &win,
     } else if( overmap_font && g && win == g->w_overmap ) {
         if( use_tiles && use_tiles_overmap ) {
             // tiles might have different dimensions than standard font
-            dim.scaled_font_size.x = tilecontext->get_tile_width();
-            dim.scaled_font_size.y = tilecontext->get_tile_height();
+            dim.scaled_font_size.x = overmap_tilecontext->get_tile_width();
+            dim.scaled_font_size.y = overmap_tilecontext->get_tile_height();
         } else {
             dim.scaled_font_size.x = overmap_font->width;
             dim.scaled_font_size.y = overmap_font->height;
@@ -3847,16 +3938,16 @@ static int map_font_height()
 
 static int overmap_font_width()
 {
-    if( use_tiles && tilecontext && use_tiles_overmap ) {
-        return tilecontext->get_tile_width();
+    if( use_tiles && overmap_tilecontext && use_tiles_overmap ) {
+        return overmap_tilecontext->get_tile_width();
     }
     return ( overmap_font ? overmap_font.get() : font.get() )->width;
 }
 
 static int overmap_font_height()
 {
-    if( use_tiles && tilecontext && use_tiles_overmap ) {
-        return tilecontext->get_tile_height();
+    if( use_tiles && overmap_tilecontext && use_tiles_overmap ) {
+        return overmap_tilecontext->get_tile_height();
     }
     return ( overmap_font ? overmap_font.get() : font.get() )->height;
 }
@@ -3925,6 +4016,10 @@ bool save_screenshot( const std::string &file_path )
     return true;
 }
 
+void repoint_overmap_tilecontext()
+{
+    overmap_tilecontext = std::make_shared<cata_tiles>( renderer, geometry );
+}
 #ifdef _WIN32
 HWND getWindowHandle()
 {

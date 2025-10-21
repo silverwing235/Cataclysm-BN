@@ -330,18 +330,13 @@
     "material": "steel",
     "symbol": ";",
     "color": "light_gray",
-    "use_action": {
-      "type": "salvage",
-      "moves_per_part": 1000,
-      "material_whitelist": [ "steel", "hardsteel", "budget_steel", "tin", "silver_small", "gold_small", "copper", "iron" ]
-    },
     "qualities": [ [ "SAW_M", 2 ], [ "SAW_W", 1 ], [ "SAW_M_FINE", 1 ], [ "BUTCHER", -90 ] ],
     "flags": [ "BELT_CLIP" ]
   },
   {
     "id": "wire_saw",
     "type": "GENERIC",
-    "category": "tools",
+    "category": "tools_workshop",
     "name": { "str": "wire saw" },
     "description": "This is a flexible saw made from thin wire, with simple handles on either end.  It should suffice for light metal and wood sawing, or for cutting chain-link fences.",
     "weight": "200 g",
@@ -353,14 +348,7 @@
     "color": "light_gray",
     "looks_like": "chain",
     "qualities": [ [ "SAW_M", 1 ], [ "SAW_W", 1 ] ],
-    "use_action": [
-      {
-        "type": "salvage",
-        "moves_per_part": 2000,
-        "material_whitelist": [ "steel", "budget_steel", "tin", "silver_small", "gold_small", "copper", "iron" ]
-      },
-      "HACKSAW"
-    ]
+    "use_action": [ "HACKSAW" ]
   },
   {
     "id": "hammer",
@@ -551,11 +539,11 @@
     "type": "TOOL",
     "category": "tools_workshop",
     "name": { "str": "gunsmith repair kit" },
-    "description": "This is a complete toolkit made to repair damaged firearms.  Powered by standard batteries, it is a vital tool for long-term firearms maintenance.  It requires 25 charges of battery power per use.",
-    "weight": "9860 g",
-    "volume": "2500 ml",
-    "price": 5000,
-    "price_postapoc": 1500,
+    "description": "This is a complete toolkit made to repair damaged firearms, disassemble ammunition and manufacture firearm modifications.  Powered by standard batteries, it can tackle any armory work when coupled with a hand press.  It requires 25 charges of battery power per use.",
+    "weight": "6000 g",
+    "volume": "3500 ml",
+    "price": 3000,
+    "price_postapoc": 1000,
     "to_hit": -2,
     "bashing": 8,
     "material": [ "steel", "aluminum" ],
@@ -573,7 +561,10 @@
       [ "WRENCH", 2 ],
       [ "SCREW_FINE", 1 ],
       [ "SCREW", 1 ],
-      [ "CHISEL", 3 ]
+      [ "CHISEL", 3 ],
+      [ "DRILL", 3 ],
+      [ "PULL", 2 ],
+      [ "CASING_FORMING", 1 ]
     ],
     "use_action": [ "GUN_CLEAN", "GUN_REPAIR", "CROWBAR", "HAMMER" ],
     "magazines": [
@@ -736,7 +727,17 @@
     "material": "steel",
     "symbol": ";",
     "color": "light_gray",
-    "qualities": [ [ "CUT", 1 ], [ "SAW_W", 1 ], [ "SAW_M", 1 ], [ "WRENCH", 1 ], [ "SCREW", 1 ], [ "SCREW_FINE", 1 ], [ "BUTCHER", 7 ] ],
+    "qualities": [
+      [ "CUT", 1 ],
+      [ "SAW_W", 1 ],
+      [ "SAW_M", 1 ],
+      [ "WRENCH", 1 ],
+      [ "SCREW", 1 ],
+      [ "SCREW_FINE", 1 ],
+      [ "BUTCHER", 7 ],
+      [ "CUT_M", 1 ],
+      [ "PULL_FINE", 2 ]
+    ],
     "flags": [ "STAB", "SHEATH_KNIFE" ]
   },
   {
@@ -753,7 +754,7 @@
     "symbol": ";",
     "color": "red",
     "ammo": "weldgas",
-    "charges_per_use": 4,
+    "charges_per_use": 2,
     "use_action": "OXYTORCH",
     "qualities": [ [ "WELD", 2 ] ],
     "magazines": [ [ "weldgas", [ "weldtank", "tinyweldtank" ] ] ],
@@ -797,6 +798,70 @@
     "flags": [ "STAB", "DURABLE_MELEE", "NONCONDUCTIVE", "DIG_TOOL", "SHEATH_AXE" ]
   },
   {
+    "id": "propick_debug",
+    "type": "GENERIC",
+    "category": "tools_workshop",
+    "looks_like": "pickaxe",
+    "weapon_category": [ "HOOKED_POLES" ],
+    "name": { "str": "debugging prospecting pick" },
+    "description": "This is a medium pickaxe-slash-hammer that could reveal close by ore pockets. This one has an obscene range, for debugging. God save your CPU.",
+    "weight": "708 g",
+    "volume": "1 L",
+    "price": "160 USD",
+    "price_postapoc": "1250 cent",
+    "to_hit": -2,
+    "bashing": 20,
+    "cutting": 12,
+    "material": [ "wood", "steel" ],
+    "symbol": "/",
+    "color": "dark_gray",
+    "use_action": { "type": "prospect_pick", "radius": 10 },
+    "qualities": [ [ "HAMMER", 2 ], [ "HAMMER_FINE", 1 ] ],
+    "techniques": [ "WBLOCK_1" ],
+    "flags": [ "STAB", "DURABLE_MELEE", "NONCONDUCTIVE", "DIG_TOOL", "SHEATH_AXE" ]
+  },
+  {
+    "id": "propick_alpha",
+    "type": "GENERIC",
+    "category": "tools_workshop",
+    "looks_like": "pickaxe",
+    "weapon_category": [ "HOOKED_POLES" ],
+    "name": { "str": "crude prospecting pick" },
+    "description": "This is a crude hammer-pick used for finding nearby mineral veins. Terrible for anything you're not basically standing on.",
+    "weight": "708 g",
+    "volume": "1 L",
+    "price": "160 USD",
+    "price_postapoc": "1250 cent",
+    "to_hit": -2,
+    "bashing": 20,
+    "cutting": 12,
+    "material": [ "wood", "stone" ],
+    "symbol": "/",
+    "color": "dark_gray",
+    "use_action": { "type": "prospect_pick", "radius": 1 },
+    "qualities": [ [ "HAMMER", 2 ], [ "HAMMER_FINE", 1 ] ],
+    "techniques": [ "WBLOCK_1" ],
+    "flags": [ "STAB", "DURABLE_MELEE", "NONCONDUCTIVE", "DIG_TOOL", "SHEATH_AXE" ]
+  },
+  {
+    "id": "propick_beta",
+    "name": "copper prospecting pick",
+    "description": "This is a copper hammer-pick used for finding nearby mineral veins. Not accurate enough for long range, but works.",
+    "type": "GENERIC",
+    "copy-from": "propick_alpha",
+    "material": [ "wood", "copper" ],
+    "use_action": { "type": "prospect_pick", "radius": 2 }
+  },
+  {
+    "id": "propick_charlie",
+    "name": "steel prospecting pick",
+    "description": "This is a steel hammer-pick used for finding nearby mineral veins. Can help you sniff out even faint traces of minerals.",
+    "type": "GENERIC",
+    "copy-from": "propick_alpha",
+    "material": [ "wood", "steel" ],
+    "use_action": { "type": "prospect_pick", "radius": 3 }
+  },
+  {
     "id": "pin_reamer",
     "type": "GENERIC",
     "category": "tools_workshop",
@@ -828,7 +893,7 @@
     "material": "steel",
     "symbol": ";",
     "color": "light_gray",
-    "qualities": [ [ "WRENCH", 1 ], [ "PULL", 1 ] ],
+    "qualities": [ [ "WRENCH", 1 ], [ "PULL", 1 ], [ "PULL_FINE", 2 ], [ "GRIP_HOT", 1 ] ],
     "flags": [ "BELT_CLIP" ]
   },
   {
@@ -868,7 +933,7 @@
   {
     "id": "primitive_hammer",
     "type": "GENERIC",
-    "category": "tools",
+    "category": "tools_workshop",
     "weapon_category": [ "1H_HAMMERS" ],
     "name": { "str": "stone hammer" },
     "description": "This is a rock affixed to a stick, in the crude facsimile of a hammer.  It functions adequately as a hammer, but really can't compare to a proper one.",
@@ -952,7 +1017,8 @@
       [ "WRENCH", 2 ],
       [ "SCREW_FINE", 1 ],
       [ "SCREW", 1 ],
-      [ "CHISEL", 3 ]
+      [ "CHISEL", 3 ],
+      [ "CASING_FORMING", 1 ]
     ],
     "use_action": [ "GUN_CLEAN", "GUN_REPAIR", "CROWBAR", "HAMMER" ],
     "magazines": [
@@ -1014,7 +1080,7 @@
     "id": "soldering_ethanol",
     "looks_like": "soldering_iron",
     "type": "TOOL",
-    "category": "tools",
+    "category": "tools_workshop",
     "name": { "str": "alcohol-fueled soldering iron" },
     "description": "This is a device with a metal tip that can get very hot.  It is necessary for advanced electronics crafting.  A metal tip is hold over the burner to create enough heat to solder.  Not as sophisticated as a regular soldering iron.",
     "weight": "1000 g",
@@ -1070,43 +1136,14 @@
       [ "SAW_M_FINE", 1 ],
       [ "WRENCH_FINE", 1 ],
       [ "SCREW_FINE", 1 ],
+      [ "SANDING", 2 ],
+      [ "DRILL", 2 ],
+      [ "PULL_FINE", 2 ],
+      [ "CUT_M", 1 ],
+      [ "HV_INSULATION", 1 ],
       [ "BUTCHER", 11 ]
     ],
-    "use_action": [
-      "HAMMER",
-      "CROWBAR",
-      {
-        "type": "salvage",
-        "moves_per_part": 1000,
-        "material_whitelist": [
-          "steel",
-          "hardsteel",
-          "budget_steel",
-          "tin",
-          "silver_small",
-          "gold_small",
-          "copper",
-          "iron",
-          "acidchitin",
-          "alien_resin",
-          "bone",
-          "chitin",
-          "cotton",
-          "faux_fur",
-          "fur",
-          "kevlar",
-          "kevlar_rigid",
-          "leather",
-          "neoprene",
-          "nomex",
-          "nylon",
-          "plastic",
-          "rubber",
-          "wood",
-          "wool"
-        ]
-      }
-    ]
+    "use_action": [ "HAMMER", "CROWBAR" ]
   },
   {
     "id": "toolbox_workshop",
@@ -1140,43 +1177,14 @@
       [ "BUTCHER", 11 ],
       [ "FILE", 2 ],
       [ "REAM", 1 ],
+      [ "SANDING", 2 ],
+      [ "DRILL", 2 ],
+      [ "PULL_FINE", 2 ],
+      [ "CUT_M", 1 ],
+      [ "HV_INSULATION", 1 ],
       [ "VISE", 1 ]
     ],
-    "use_action": [
-      "HAMMER",
-      "CROWBAR",
-      {
-        "type": "salvage",
-        "moves_per_part": 1000,
-        "material_whitelist": [
-          "steel",
-          "hardsteel",
-          "budget_steel",
-          "tin",
-          "silver_small",
-          "gold_small",
-          "copper",
-          "iron",
-          "acidchitin",
-          "alien_resin",
-          "bone",
-          "chitin",
-          "cotton",
-          "faux_fur",
-          "fur",
-          "kevlar",
-          "kevlar_rigid",
-          "leather",
-          "neoprene",
-          "nomex",
-          "nylon",
-          "plastic",
-          "rubber",
-          "wood",
-          "wool"
-        ]
-      }
-    ]
+    "use_action": [ "HAMMER", "CROWBAR" ]
   },
   {
     "id": "toolset_extended",
@@ -1203,37 +1211,6 @@
         "skill": "mechanics",
         "cost_scaling": 0.1,
         "move_cost": 1000
-      },
-      {
-        "type": "salvage",
-        "moves_per_part": 1000,
-        "material_whitelist": [
-          "steel",
-          "hardsteel",
-          "budget_steel",
-          "tin",
-          "silver_small",
-          "gold_small",
-          "copper",
-          "iron",
-          "acidchitin",
-          "alien_resin",
-          "bone",
-          "chitin",
-          "cotton",
-          "faux_fur",
-          "fur",
-          "kevlar",
-          "kevlar_rigid",
-          "leather",
-          "neoprene",
-          "nomex",
-          "nylon",
-          "plastic",
-          "rubber",
-          "wood",
-          "wool"
-        ]
       },
       { "flame": false, "type": "cauterize" }
     ],

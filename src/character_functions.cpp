@@ -1,9 +1,12 @@
 #include "character_functions.h"
 
+#include <algorithm>
+#include <string>
 #include <utility>
 
 #include "ammo.h"
 #include "bionics.h"
+#include "bodypart.h"
 #include "calendar.h"
 #include "character_martial_arts.h"
 #include "character.h"
@@ -26,6 +29,7 @@
 #include "skill.h"
 #include "submap.h"
 #include "trap.h"
+#include "flag_trait.h"
 #include "uistate.h"
 #include "veh_type.h"
 #include "vehicle.h"
@@ -58,6 +62,12 @@ static const trait_flag_str_id trait_flag_PSYCHOPATH( "PSYCHOPATH" );
 static const trait_flag_str_id trait_flag_SAPIOVORE( "SAPIOVORE" );
 static const trait_flag_str_id trait_flag_SPIRITUAL( "SPIRITUAL" );
 
+static const trait_flag_str_id trait_flag_MUTATION_FLIGHT( "MUTATION_FLIGHT" );
+static const trait_flag_str_id trait_flag_FLIGHT_ALWAYS_ACTIVE( "FLIGHT_ALWAYS_ACTIVE" );
+
+const flag_id flag_ALLOWS_FLIGHT( "ALLOWS_FLIGHT" );
+const flag_id flag_ALWAYS_ALLOWS_FLIGHT( "ALWAYS_ALLOWS_FLIGHT" );
+
 static const efftype_id effect_boomered( "boomered" );
 static const efftype_id effect_darkness( "darkness" );
 static const efftype_id effect_meth( "meth" );
@@ -69,6 +79,8 @@ static const itype_id itype_battery( "battery" );
 static const itype_id itype_UPS( "UPS" );
 
 static const skill_id skill_throw( "throw" );
+
+static const quality_id qual_SLEEP_AID( "SLEEP_AID" );
 
 namespace character_funcs
 {
@@ -106,6 +118,49 @@ void siphon( Character &ch, vehicle &veh, const itype_id &desired_liquid )
     } else {
         veh.drain( desired_liquid, qty );
     }
+}
+
+bool can_noclip( const Character &ch )
+{
+    return ch.has_trait( trait_id( "DEBUG_NOCLIP" ) );
+}
+
+bool can_fly( Character &ch )
+{
+
+    // if the player can noclip, flying is technically a part of that
+    if( can_noclip( ch ) ) {
+        return true;
+    }
+
+    for( const auto &w : ch.worn ) {
+        if( ( w->is_active() && w->has_flag( flag_ALLOWS_FLIGHT ) ) ||
+            w->has_flag( flag_ALWAYS_ALLOWS_FLIGHT ) ) {
+            return true;
+        }
+    }
+
+    for( const trait_id &mid : ch.get_mutations() ) {
+        auto it = ch.my_mutations.find( mid->id );
+        if( it != ch.my_mutations.end() ) {
+            if( ( mid->flags.contains( trait_flag_MUTATION_FLIGHT ) && ( can_use_mutation( mid, ch ) &&
+                    it->second.powered ) ) ||  mid->flags.contains( trait_flag_FLIGHT_ALWAYS_ACTIVE ) ) {
+                return true;
+            } else if( ( mid->flags.contains( trait_flag_MUTATION_FLIGHT ) && !can_use_mutation( mid, ch ) &&
+                         it->second.powered ) ) {
+                ch.deactivate_mutation( mid );
+                return false;
+            }
+        }
+    }
+    for( const bionic &bio : *ch.my_bionics ) {
+        if( bio.info().has_flag( flag_id( "BIONIC_FLIGHT" ) ) &&
+            ch.get_power_level() > units::from_kilojoule( 0 ) && bio.powered ) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool is_book_morale_boosted( const Character &ch, const item &book )
@@ -212,7 +267,7 @@ comfort_response_t base_comfort_value( const Character &who, const tripoint &p )
     // As in the latter also checks for fatigue and other variables while this function
     // only looks at the base comfyness of something. It's still subjective, in a sense,
     // as arachnids who sleep in webs will find most places comfortable for instance.
-    int comfort = 0;
+    float comfort = 0.0;
 
     comfort_response_t comfort_response;
 
@@ -223,6 +278,7 @@ comfort_response_t base_comfort_value( const Character &who, const tripoint &p )
                     ( who.has_trait( trait_WEB_WEAVER ) ) );
     bool in_shell = who.has_active_mutation( trait_SHELL2 );
     bool watersleep = who.has_trait( trait_WATERSLEEP );
+    bool music = who.has_active_item_with_action( "MP3_ON" );
 
     map &here = get_map();
     const optional_vpart_position vp = here.veh_at( p );
@@ -244,9 +300,11 @@ comfort_response_t base_comfort_value( const Character &who, const tripoint &p )
             if( carg ) {
                 const vehicle_stack items = vp->vehicle().get_items( carg->part_index() );
                 for( item *items_it : items ) {
-                    if( items_it->has_flag( STATIC( flag_id( "SLEEP_AID" ) ) ) ) {
-                        // Note: BED + SLEEP_AID = 9 pts, or 1 pt below very_comfortable
-                        comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+                    int sleep_quality = items_it->get_quality( qual_SLEEP_AID );
+                    if( sleep_quality >= 0 ) {
+                        // uncomfortable = -7, neutral = 0, comfortable = 5+, very comfortable = 10
+                        // Note: BED + LEVEL 2 SLEEP_AID = 7 pts, or 3 pt below very_comfortable
+                        comfort += sleep_quality;
                         comfort_response.aid.push_back( items_it );
                     }
                 }
@@ -280,13 +338,42 @@ comfort_response_t base_comfort_value( const Character &who, const tripoint &p )
         if( comfort_response.aid.empty() ) {
             const map_stack items = here.i_at( p );
             for( item *items_it : items ) {
-                if( items_it->has_flag( STATIC( flag_id( "SLEEP_AID" ) ) ) ) {
-                    // Note: BED + SLEEP_AID = 9 pts, or 1 pt below very_comfortable
-                    comfort += 1 + static_cast<int>( comfort_level::slightly_comfortable );
+                int sleep_quality = items_it->get_quality( qual_SLEEP_AID );
+                if( sleep_quality >= 0 ) {
+                    // Note: BED + LEVEL 2 SLEEP_AID = 7 pts, or 3 pt below very_comfortable
+                    comfort += sleep_quality;
                     comfort_response.aid.push_back( items_it );
                 }
             }
         }
+        bool skintight_or_naked = true;
+        for( item *it : who.worn ) {
+            if( !it->has_flag( flag_SKINTIGHT ) && !it->has_flag( flag_OVERSIZE ) ) {
+                skintight_or_naked = false;
+            }
+
+            // check wearing bonus (sleep aid clothing is worth double when worn, similar to snuggling)
+            int sleep_quality = it->get_quality( qual_SLEEP_AID );
+            if( sleep_quality >= 0 ) {
+                comfort += sleep_quality;
+                comfort_response.aid.push_back( it );
+            }
+        }
+
+        // bonus if player is wearing only skintight clothing (pajamas/boxers), oversized clothing (big hoodies, blankets, etc) or naked
+        if( skintight_or_naked ) {
+            comfort += 1;
+        }
+
+        // bonus if player is snuggling with a specific item
+        for( item *it : who.wielded_items() ) {
+            if( it->has_quality( qual_SLEEP_AID ) ) {
+                // don't add to the aid array, because we print special mesage here
+                comfort += it->get_quality( qual_SLEEP_AID ) * 2;
+                comfort_response.aid.push_back( it );
+            }
+        }
+
         if( fungaloid_cosplay && here.has_flag_ter_or_furn( "FUNGUS", p ) ) {
             comfort += static_cast<int>( comfort_level::very_comfortable );
         } else if( watersleep && here.has_flag_ter( "SWIMMABLE", p ) ) {
@@ -320,14 +407,17 @@ comfort_response_t base_comfort_value( const Character &who, const tripoint &p )
             comfort = static_cast<int>( comfort_level::impossible );
         }
     }
-
-    if( comfort > static_cast<int>( comfort_level::comfortable ) ) {
+    // If you are listening to music, give a small buff to comfort
+    if( music ) {
+        comfort += 2;
+    }
+    if( comfort >= static_cast<int>( comfort_level::very_comfortable ) ) {
         comfort_response.level = comfort_level::very_comfortable;
-    } else if( comfort > static_cast<int>( comfort_level::slightly_comfortable ) ) {
+    } else if( comfort >= static_cast<int>( comfort_level::comfortable ) ) {
         comfort_response.level = comfort_level::comfortable;
-    } else if( comfort > static_cast<int>( comfort_level::neutral ) ) {
+    } else if( comfort >= static_cast<int>( comfort_level::slightly_comfortable ) ) {
         comfort_response.level = comfort_level::slightly_comfortable;
-    } else if( comfort == static_cast<int>( comfort_level::neutral ) ) {
+    } else if( comfort >= static_cast<int>( comfort_level::neutral ) ) {
         comfort_response.level = comfort_level::neutral;
     } else {
         comfort_response.level = comfort_level::uncomfortable;
@@ -380,6 +470,18 @@ int rate_sleep_spot( const Character &who, const tripoint &p )
     } else {
         // Make it harder for insomniac to get around the trait
         sleepy -= current_stim;
+    }
+
+    if( one_in( 3 ) ) {
+        if( comfort_info.level >= comfort_level::very_comfortable ) {
+            who.add_msg_if_player( "You feel very comfortable." );
+        } else if( comfort_info.level >= comfort_level::comfortable ) {
+            who.add_msg_if_player( "You feel comfortable." );
+        } else if( comfort_info.level >= comfort_level::slightly_comfortable ) {
+            who.add_msg_if_player( "You feel slightly comfortable." );
+        } else {
+            who.add_msg_if_player( "You feel uncomfortable." );
+        }
     }
 
     return sleepy;
@@ -449,7 +551,7 @@ std::string fmt_wielded_weapon( const Character &who )
         bool base = weapon.ammo_capacity() > 0 && !weapon.has_flag( flag_RELOAD_AND_SHOOT );
 
         const auto mods = weapon.gunmods();
-        bool aux = std::any_of( mods.begin(), mods.end(), [&]( const item * e ) {
+        bool aux = std::ranges::any_of( mods, [&]( const item * e ) {
             return e->is_gun() && e->ammo_capacity() > 0 && !e->has_flag( flag_RELOAD_AND_SHOOT );
         } );
 
@@ -466,10 +568,10 @@ std::string fmt_wielded_weapon( const Character &who )
         }
         return str;
 
-    } else if( weapon.is_container() && weapon.contents.num_item_stacks() == 1 ) {
-        return string_format( "%s (%d)", weapon.tname(),
-                              weapon.contents.front().charges );
-
+    } else if( ( weapon.is_container() && weapon.contents.num_item_stacks() == 1 ) ||
+               weapon.ammo_capacity() > 0 ) {
+        return string_format( "(%d) %s",
+                              weapon.is_container() ? weapon.contents.front().charges : weapon.ammo_remaining(), weapon.tname() );
     } else {
         return weapon.tname();
     }
@@ -543,7 +645,7 @@ bool try_wield_contents( Character &who, item &container, item *internal_item, b
     if( internal_item == nullptr ) {
         std::vector<std::string> opts;
         std::vector<item *> container_contents = container.contents.all_items_top();
-        std::transform( container_contents.begin(), container_contents.end(),
+        std::ranges::transform( container_contents,
         std::back_inserter( opts ), []( const item * elem ) {
             return elem->display_name();
         } );
@@ -580,7 +682,7 @@ bool try_wield_contents( Character &who, item &container, item *internal_item, b
 
     who.set_primary_weapon( internal_item->detach() );
     who.inv_update_invlet( *internal_item );
-    who.inv_update_cache_with_item( *internal_item );
+    who.inv_update_invlet_cache_with_item( *internal_item );
     who.last_item = internal_item->typeId();
 
     /**
@@ -772,6 +874,19 @@ bool list_ammo( const Character &who, item &base, std::vector<item_reload_option
                       : ammo->typeId();
             const bool can_reload_with = e->can_reload_with( id );
             if( can_reload_with ) {
+                // Skip if is magazine inside gun/mod, but gun/mod can't fire it (e.g 300 Blackout on STANAG on AR-15)
+                if( e->is_magazine() && e->parent_item() ) {
+                    auto ammo_type = ( ammo->is_ammo_container() || ammo->is_container() )
+                                     ? ammo->contents.front().ammo_type()
+                                     : ammo->ammo_type();
+                    const std::set<ammotype> &supported_ammo = e->parent_item()->ammo_types();
+                    const bool gun_supports = std::ranges::any_of( supported_ammo, [&]( const ammotype & at ) {
+                        return at == ammo_type;
+                    } );
+                    if( !gun_supports ) {
+                        continue;
+                    }
+                }
                 // Speedloaders require an empty target.
                 if( include_potential || !ammo->has_flag( flag_SPEEDLOADER ) || e->ammo_remaining() < 1 ) {
                     ammo_match_found = true;
@@ -786,7 +901,7 @@ bool list_ammo( const Character &who, item &base, std::vector<item_reload_option
     return ammo_match_found;
 }
 
-item_reload_option select_ammo( const Character &who, item &base,
+item_reload_option select_ammo( const player &who, item &base,
                                 std::vector<item_reload_option> opts )
 {
     if( opts.empty() ) {
@@ -805,7 +920,7 @@ item_reload_option select_ammo( const Character &who, item &base,
 
     // Construct item names
     std::vector<std::string> names;
-    std::transform( opts.begin(), opts.end(),
+    std::ranges::transform( opts,
     std::back_inserter( names ), [&]( const item_reload_option & e ) {
         const auto ammo_color = [&]( const std::string & name ) {
             return base.is_gun() && e.ammo->ammo_data() &&
@@ -836,7 +951,7 @@ item_reload_option select_ammo( const Character &who, item &base,
 
     // Get location descriptions
     std::vector<std::string> where;
-    std::transform( opts.begin(), opts.end(),
+    std::ranges::transform( opts,
     std::back_inserter( where ), [&]( const item_reload_option & e ) {
         bool is_ammo_container = e.ammo->is_ammo_container();
         if( is_ammo_container || e.ammo->is_container() ) {
@@ -1036,7 +1151,7 @@ item_reload_option select_ammo( const Character &who, item &base,
     return opts[ menu.ret ];
 }
 
-item_reload_option select_ammo( const Character &who, item &base, bool prompt,
+item_reload_option select_ammo( const player &who, item &base, bool prompt,
                                 bool include_empty_mags, bool include_potential )
 {
     std::vector<item_reload_option> ammo_list;
@@ -1071,15 +1186,15 @@ item_reload_option select_ammo( const Character &who, item &base, bool prompt,
     }
 
     // sort in order of move cost (ascending), then remaining ammo (descending) with empty magazines always last
-    std::stable_sort( ammo_list.begin(), ammo_list.end(), []( const item_reload_option & lhs,
+    std::ranges::stable_sort( ammo_list, []( const item_reload_option & lhs,
     const item_reload_option & rhs ) {
         return lhs.ammo->ammo_remaining() > rhs.ammo->ammo_remaining();
     } );
-    std::stable_sort( ammo_list.begin(), ammo_list.end(), []( const item_reload_option & lhs,
+    std::ranges::stable_sort( ammo_list, []( const item_reload_option & lhs,
     const item_reload_option & rhs ) {
         return lhs.moves() < rhs.moves();
     } );
-    std::stable_sort( ammo_list.begin(), ammo_list.end(), []( const item_reload_option & lhs,
+    std::ranges::stable_sort( ammo_list, []( const item_reload_option & lhs,
     const item_reload_option & rhs ) {
         return ( lhs.ammo->ammo_remaining() != 0 ) > ( rhs.ammo->ammo_remaining() != 0 );
     } );
@@ -1177,10 +1292,11 @@ void find_ammo_helper( T &src, const item &obj, bool empty, Output out, bool nes
             if( node->is_magazine() ) {
 
                 if( !node->contents.empty() ) {
-                    for( const ammotype &at : ammo ) {
-                        if( node->contents.front().ammo_type() != at ) {
-                            return VisitResponse::SKIP;
-                        }
+                    const bool match = std::ranges::any_of( ammo, [&]( const ammotype & at ) {
+                        return node->contents.front().ammo_type() == at;
+                    } );
+                    if( !match ) {
+                        return VisitResponse::SKIP;
                     }
                 }
 

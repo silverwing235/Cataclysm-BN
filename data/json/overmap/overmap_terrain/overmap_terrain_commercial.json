@@ -1199,6 +1199,22 @@
   },
   {
     "type": "overmap_terrain",
+    "id": "s_dive_shop",
+    "name": "dive shop",
+    "copy-from": "generic_city_building",
+    "sym": "D",
+    "color": "blue"
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "s_dive_shop_roof",
+    "name": "dive shop roof",
+    "copy-from": "generic_city_building",
+    "sym": "D",
+    "color": "blue"
+  },
+  {
+    "type": "overmap_terrain",
     "id": "s_arcade",
     "name": "arcade",
     "copy-from": "generic_city_building",
@@ -1369,7 +1385,7 @@
     "type": "overmap_terrain",
     "id": "headshop",
     "copy-from": "generic_city_building",
-    "name": "Head Shop",
+    "name": "head shop",
     "sym": "0",
     "color": "i_white",
     "extend": { "flags": [ "SOURCE_LUXURY" ] }

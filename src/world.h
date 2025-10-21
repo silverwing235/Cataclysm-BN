@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_WORLD_H
-#define CATA_SRC_WORLD_H
 
 #include <functional>
 #include <string>
@@ -73,8 +71,6 @@ struct WORLDINFO {
 
         WORLDINFO();
         void COPY_WORLD( const WORLDINFO *world_to_copy );
-
-        bool needs_lua() const;
 
         bool save_exists( const save_t &name ) const;
         void add_save( const save_t &name );
@@ -182,4 +178,4 @@ class world
         sqlite3 *get_player_db();
 };
 
-#endif // CATA_SRC_WORLD_H
+

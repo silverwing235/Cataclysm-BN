@@ -1,4 +1,5 @@
 #include "messages.h"
+#include "message_types.h"
 #include "calendar.h"
 #include "catacharset.h"
 #include "color.h"
@@ -141,7 +142,7 @@ class messages_impl
             }
 
             // update the cooldown message timer due to coalescing
-            const auto cooldown_it = std::find_if( cooldown_templates.begin(), cooldown_templates.end(),
+            const auto cooldown_it = std::ranges::find_if( cooldown_templates,
             [&m]( game_message & am ) -> bool {
                 return m.message == am.message;
             } );
@@ -209,7 +210,7 @@ class messages_impl
 
             // We look for **exactly the same** message string in the cooldown templates
             // If there is one, this means the same message was already displayed.
-            const auto cooldown_it = std::find_if( cooldown_templates.begin(), cooldown_templates.end(),
+            const auto cooldown_it = std::ranges::find_if( cooldown_templates,
             [&message]( game_message & m_cooldown ) -> bool {
                 return m_cooldown.message == message.message;
             } );
@@ -288,8 +289,8 @@ class messages_impl
 
             // Is the message string already in the cooldown queue?
             // If it's not we must put it in the cooldown queue now, otherwise just increment the number of times we have seen it.
-            const auto cooldown_message_it = std::find_if( cooldown_templates.begin(),
-            cooldown_templates.end(), [&message]( game_message & cooldown_message ) -> bool {
+            const auto cooldown_message_it = std::ranges::find_if( cooldown_templates,
+            [&message]( game_message & cooldown_message ) -> bool {
                 return cooldown_message.message == message.message;
             } );
             if( cooldown_message_it == cooldown_templates.end() ) {
@@ -368,34 +369,6 @@ bool Messages::has_undisplayed_messages()
 {
     return player_messages.has_undisplayed_messages();
 }
-
-// Returns pairs of message log type id and untranslated name
-static const std::vector<std::pair<game_message_type, const char *>> &msg_type_and_names()
-{
-    static const std::vector<std::pair<game_message_type, const char *>> type_n_names = {
-        { m_good, translate_marker_context( "message type", "good" ) },
-        { m_bad, translate_marker_context( "message type", "bad" ) },
-        { m_mixed, translate_marker_context( "message type", "mixed" ) },
-        { m_warning, translate_marker_context( "message type", "warning" ) },
-        { m_info, translate_marker_context( "message type", "info" ) },
-        { m_neutral, translate_marker_context( "message type", "neutral" ) },
-        { m_debug, translate_marker_context( "message type", "debug" ) },
-    };
-    return type_n_names;
-}
-
-// Get message type from translated name, returns true if name is a valid translated name
-static bool msg_type_from_name( game_message_type &type, const std::string &name )
-{
-    for( const auto &p : msg_type_and_names() ) {
-        if( name == pgettext( "message type", p.second ) ) {
-            type = p.first;
-            return true;
-        }
-    }
-    return false;
-}
-
 namespace Messages
 {
 

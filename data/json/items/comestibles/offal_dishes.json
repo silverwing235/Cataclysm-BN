@@ -6,7 +6,7 @@
     "name": { "str_sp": "foie gras" },
     "symbol": "%",
     "looks_like": "meat_cooked",
-    "description": "Thought it's not technically foie gras, you don't have to think about that.",
+    "description": "Though it's not technically foie gras, you don't have to think about that.",
     "price_postapoc": "150 cent",
     "material": [ "flesh", "fruit" ],
     "color": "brown",
@@ -419,7 +419,8 @@
     "type": "COMESTIBLE",
     "name": { "str": "artificial sausage casing" },
     "description": "Sausage casings made from plastic.  Ready to be used for forming meat products.",
-    "material": "plastic"
+    "material": "plastic",
+    "vitamins": [ [ "meat_allergen", 0 ] ]
   },
   {
     "type": "COMESTIBLE",

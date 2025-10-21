@@ -77,6 +77,7 @@
 #include "ranged.h"
 #include "rng.h"
 #include "safemode_ui.h"
+#include "salvage.h"
 #include "scores_ui.h"
 #include "sounds.h"
 #include "string_formatter.h"
@@ -115,8 +116,8 @@ static const efftype_id effect_alarm_clock( "alarm_clock" );
 static const efftype_id effect_laserlocked( "laserlocked" );
 static const efftype_id effect_relax_gas( "relax_gas" );
 
-static const itype_id itype_radiocontrol( "radiocontrol" );
 static const itype_id itype_shoulder_strap( "shoulder_strap" );
+static const itype_id itype_pistol_lanyard( "pistol_lanyard" );
 
 static const skill_id skill_melee( "melee" );
 
@@ -127,6 +128,7 @@ static const bionic_id bio_remote( "bio_remote" );
 static const trait_id trait_HIBERNATE( "HIBERNATE" );
 static const trait_id trait_PROF_CHURL( "PROF_CHURL" );
 static const trait_id trait_SHELL2( "SHELL2" );
+static const trait_id trait_BRAWLER( "BRAWLER" );
 
 static const std::string flag_LOCKED( "LOCKED" );
 
@@ -880,7 +882,7 @@ static void wait()
     map &here = get_map();
 
     if( u.controlling_vehicle && ( here.veh_at( u.pos() )->vehicle().velocity ||
-                                   here.veh_at( u.pos() )->vehicle().cruise_velocity ) ) {
+                                   here.veh_at( u.pos() )->vehicle().cruise_velocity ) && u.pos().z < 4 ) {
         popup( _( "You can't pass time while controlling a moving vehicle." ) );
         return;
     }
@@ -921,6 +923,11 @@ static void wait()
         if( g->u.get_stamina() < g->u.get_stamina_max() ) {
             as_m.addentry( 12, true, 'w', _( "Wait until you catch your breath" ) );
             durations.emplace( 12, 15_minutes ); // to hide it from showing
+        }
+        if( u.controlling_vehicle && u.pos().z > 3 ) {
+            add_menu_item( 14, 'x', "", 10_seconds );
+            add_menu_item( 15, 'y', "", 30_seconds );
+            add_menu_item( 16, 'z', "", 1_minutes );
         }
         add_menu_item( 1, '1', "", 5_minutes );
         add_menu_item( 2, '2', "", 30_minutes );
@@ -1097,7 +1104,8 @@ static void sleep()
 
     time_duration try_sleep_dur = 24_hours;
     std::string deaf_text;
-    if( g->u.is_deaf() ) {
+    // Infolink alarm is silent and works even if deaf
+    if( g->u.is_deaf() && !g->u.has_bionic( bionic_id( "bio_infolink" ) ) ) {
         deaf_text = _( "<color_c_red> (DEAF!)</color>" );
     }
     if( u.has_alarm_clock() ) {
@@ -1371,6 +1379,10 @@ static void fire()
                 // wield item currently worn using shoulder strap
                 options.push_back( w->display_name() );
                 actions.emplace_back( [&] { u.wield( *w ); } );
+            } else if( w->is_gun() && w->gunmod_find( itype_pistol_lanyard ) ) {
+                // wield item currently worn using pistol lanyard
+                options.push_back( w->display_name() );
+                actions.emplace_back( [&] { u.wield( *w ); } );
             }
         }
         if( !options.empty() ) {
@@ -1435,16 +1447,25 @@ static void cast_spell()
     }
 
     bool can_cast_spells = false;
+    bool has_brawler_spell = false;
     for( spell_id sp : spells ) {
         spell temp_spell = u.magic->get_spell( sp );
         if( temp_spell.can_cast( u ) ) {
             can_cast_spells = true;
+        }
+        if( temp_spell.has_flag( spell_flag::BRAWL ) || temp_spell.has_flag( spell_flag::PHYSICAL ) ) {
+            has_brawler_spell = true;
         }
     }
 
     if( !can_cast_spells ) {
         add_msg( game_message_params{ m_bad, gmf_bypass_cooldown },
                  _( "You can't cast any of the spells you know!" ) );
+        return;
+    }
+    if( !has_brawler_spell && u.has_trait( trait_BRAWLER ) ) {
+        add_msg( game_message_params{ m_bad, gmf_bypass_cooldown },
+                 _( "You don't know any spells you can cast as a Brawler!" ) );
         return;
     }
 
@@ -1454,6 +1475,24 @@ static void cast_spell()
     }
 
     spell &sp = *u.magic->get_spells()[spell_index];
+
+    if( !( sp.has_flag( spell_flag::BRAWL ) || sp.has_flag( spell_flag::PHYSICAL ) ) &&
+        u.has_trait( trait_BRAWLER ) ) {
+        add_msg( game_message_params{ m_bad, gmf_bypass_cooldown },
+                 _( "Pfft, that spell is for COWARDS, and a Brawler like you is no coward!" ) );
+        return;
+    }
+
+    std::set<trait_id> blockers = sp.get_blocker_muts();
+    if( !blockers.empty() ) {
+        for( trait_id blocker : blockers ) {
+            if( u.has_trait( blocker ) ) {
+                add_msg( game_message_params{ m_bad, gmf_bypass_cooldown },
+                         _( "Your %s mutation prevents you from casting this spell!" ), blocker->name() );
+                return;
+            }
+        }
+    }
 
     if( u.is_armed() && !sp.has_flag( spell_flag::NO_HANDS ) &&
         !u.primary_weapon().has_flag( flag_MAGIC_FOCUS ) && u.primary_weapon().is_two_handed( u ) ) {
@@ -1788,7 +1827,7 @@ bool game::handle_action()
             case ACTION_MOVE_LEFT:
             case ACTION_MOVE_FORTH_LEFT:
                 if( !u.get_value( "remote_controlling" ).empty() &&
-                    ( u.has_active_item( itype_radiocontrol ) ||
+                    ( u.has_active_item_with_action( "RADIOCONTROL" ) ||
                       u.has_active_bionic( bio_remote ) ) ) {
                     rcdrive( get_delta_from_movement_action( act, iso_rotate::yes ) );
                 } else if( veh_ctrl ) {
@@ -1804,8 +1843,8 @@ bool game::handle_action()
                                                               u.posz() );
                             destination_preview = m.route( u.pos(),
                                                            auto_travel_destination,
-                                                           u.get_pathfinding_settings(),
-                                                           u.get_path_avoid() );
+                                                           u.get_legacy_pathfinding_settings(),
+                                                           u.get_legacy_path_avoid() );
                             if( !destination_preview.empty() ) {
                                 destination_preview.erase( destination_preview.begin() + 1, destination_preview.end() );
                                 u.set_destination( destination_preview );
@@ -1835,7 +1874,7 @@ bool game::handle_action()
                 }
                 if( !u.in_vehicle ) {
                     vertical_move( -1, false );
-                } else if( veh_ctrl && vp->vehicle().is_rotorcraft() ) {
+                } else if( veh_ctrl && vp->vehicle().is_aircraft() ) {
                     pldrive( tripoint_below );
                 }
                 break;
@@ -1850,11 +1889,15 @@ bool game::handle_action()
                 }
                 if( !u.in_vehicle ) {
                     vertical_move( 1, false );
-                } else if( veh_ctrl && vp->vehicle().is_rotorcraft() ) {
+                } else if( veh_ctrl && vp->vehicle().is_aircraft() ) {
                     pldrive( tripoint_above );
-                } else if( veh_ctrl && vp->vehicle().has_part( "ROTOR" ) &&
-                           !vp->vehicle().has_sufficient_rotorlift() ) {
-                    add_msg( m_bad, _( "The rotors struggle to generate enough lift!" ) );
+                } else if( veh_ctrl && ( vp->vehicle().has_part( "ROTOR" ) ||
+                                         vp->vehicle().has_part( "BALLOON" ) ||
+                                         vp->vehicle().has_part( "WING" ) ) &&
+                           !vp->vehicle().has_sufficient_lift() ) {
+                    add_msg( m_bad, _( "The craft struggles to generate enough lift!" ) );
+                } else {
+                    u.add_msg_if_player( _( "You need a propeller to take off!" ) );
                 }
                 break;
 
@@ -2185,6 +2228,16 @@ bool game::handle_action()
                 }
                 break;
 
+            case ACTION_SALVAGE:
+                if( u.controlling_vehicle ) {
+                    add_msg( m_info, _( "You can't salvage items while driving." ) );
+                } else if( u.is_mounted() ) {
+                    add_msg( m_info, _( "You can't salvage items while you're riding." ) );
+                } else {
+                    salvage::menu_salvage_single( u );
+                }
+                break;
+
             case ACTION_CONSTRUCT:
                 if( u.in_vehicle ) {
                     add_msg( m_info, _( "You can't construct while in a vehicle." ) );
@@ -2346,8 +2399,22 @@ bool game::handle_action()
                 break;
 
             case ACTION_OPEN_WIKI:
-                // TODO: un-hardcode URL
-                open_url( "https://docs.cataclysmbn.org" );
+                if( !get_option<std::string>( "WIKI_DOC_URL" ).empty() ) {
+                    open_url( get_option<std::string>( "WIKI_DOC_URL" ) );
+                } else {
+                    add_msg( m_bad, _( "Invalid Wiki URL specified!" ) );
+
+                }
+
+                break;
+
+            case ACTION_OPEN_HHG:
+                if( !get_option<std::string>( "HHG_URL" ).empty() ) {
+                    open_url( get_option<std::string>( "HHG_URL" ) + std::string( "/?t=UNDEAD_PEOPLE" ) );
+                } else {
+                    add_msg( m_bad, _( "Invalid Hitchhiker's Guide URL specified!" ) );
+
+                }
                 break;
 
             case ACTION_HELP:

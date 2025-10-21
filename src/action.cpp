@@ -50,6 +50,8 @@ static const std::string flag_GOES_UP( "GOES_UP" );
 static const std::string flag_SEALED( "SEALED" );
 static const std::string flag_SWIMMABLE( "SWIMMABLE" );
 
+static const trait_flag_str_id trait_flag_TAIL_FIN( "TAIL_FIN" );
+
 class inventory;
 
 std::vector<char> keys_bound_to( action_id act, const bool restrict_to_printable )
@@ -223,6 +225,8 @@ std::string action_ident( action_id act )
             return "construct";
         case ACTION_DISASSEMBLE:
             return "disassemble";
+        case ACTION_SALVAGE:
+            return "salvage";
         case ACTION_SLEEP:
             return "sleep";
         case ACTION_CONTROL_VEHICLE:
@@ -265,6 +269,8 @@ std::string action_ident( action_id act )
             return "messages";
         case ACTION_OPEN_WIKI:
             return "open_wiki";
+        case ACTION_OPEN_HHG:
+            return "open_hhg";
         case ACTION_HELP:
             return "help";
         case ACTION_DEBUG:
@@ -353,6 +359,8 @@ std::string action_ident( action_id act )
             return "TOGGLE_CHARACTER_PREVIEW_CLOTHES";
         case ACTION_NULL:
             return "null";
+        case ACTION_SWAP_TO_NPC:
+            return "SWAPTONPC";
         default:
             return "unknown";
     }
@@ -553,7 +561,7 @@ int hotkey_for_action( action_id action, const bool restrict_to_printable )
         return key != '?';
     };
     std::vector<char> keys = keys_bound_to( action, restrict_to_printable );
-    auto valid = std::find_if( keys.begin(), keys.end(), is_valid_key );
+    auto valid = std::ranges::find_if( keys, is_valid_key );
     return valid == keys.end() ? -1 : *valid;
 }
 
@@ -588,7 +596,8 @@ bool can_move_vertical_at( const tripoint &p, int movez )
         if( movez == -1 ) {
             return !g->u.is_underwater() && !g->u.worn_with_flag( flag_FLOTATION );
         } else {
-            return g->u.swim_speed() < 500 || g->u.is_wearing( itype_id( "swim_fins" ) );
+            return g->u.swim_speed() < 500 || ( g->u.is_wearing( itype_id( "swim_fins" ) ) ||
+                                                g->u.has_trait_flag( trait_flag_TAIL_FIN ) );
         }
     }
 
@@ -678,7 +687,7 @@ auto make_register_actions( std::vector<uilist_entry> &entries, const input_cont
         const auto fn = [&]( action_id name ) -> uilist_entry {
             return { name, true, hotkey_for_action( name ), ctxt.get_action_name( action_ident( name ) ) };
         };
-        std::transform( names.begin(), names.end(), std::back_inserter( entries ), fn );
+        std::ranges::transform( names, std::back_inserter( entries ), fn );
     };
 }
 
@@ -691,7 +700,7 @@ auto make_register_categories( std::vector<uilist_entry> &entries,
             categories_by_int[last_category] = name;
             return { last_category++, true, -1, name + "…" };
         };
-        std::transform( names.begin(), names.end(), std::back_inserter( entries ),  fn );
+        std::ranges::transform( names, std::back_inserter( entries ),  fn );
     };
 }
 
@@ -767,9 +776,9 @@ action_id handle_action_menu()
 
     // sort the map by its weightings
     std::vector<std::pair<action_id, int> > sorted_pairs;
-    std::copy( action_weightings.begin(), action_weightings.end(),
-               std::back_inserter<std::vector<std::pair<action_id, int> > >( sorted_pairs ) );
-    std::reverse( sorted_pairs.begin(), sorted_pairs.end() );
+    std::ranges::copy( action_weightings,
+                       std::back_inserter<std::vector<std::pair<action_id, int> > >( sorted_pairs ) );
+    std::ranges::reverse( sorted_pairs );
 
     // Default category is called "back"
     std::string category = "back";
@@ -805,7 +814,7 @@ action_id handle_action_menu()
             register_actions( { ACTION_SAVE } );
             register_action_if_hotkey_assigned( ACTION_QUICKLOAD );
             register_action_if_hotkey_assigned( ACTION_SUICIDE );
-            register_actions( { ACTION_OPEN_WIKI, ACTION_HELP } );
+            register_actions( { ACTION_OPEN_WIKI, ACTION_OPEN_HHG, ACTION_HELP } );
             if( ( entry = &entries.back() ) ) {
                 // help _is_a menu.
                 entry->txt += "…";
@@ -867,7 +876,7 @@ action_id handle_action_menu()
         } else if( category == _( "Craft" ) ) {
             register_actions( {
                 ACTION_CRAFT, ACTION_RECRAFT, ACTION_LONGCRAFT,
-                ACTION_CONSTRUCT, ACTION_DISASSEMBLE
+                ACTION_CONSTRUCT, ACTION_DISASSEMBLE, ACTION_SALVAGE
             } );
         } else if( category == _( "Info" ) ) {
             register_actions( {
@@ -929,7 +938,7 @@ action_id handle_main_menu()
     const auto register_actions = make_register_actions( entries, ctxt );
 
     register_actions( {
-        ACTION_OPEN_WIKI, ACTION_HELP, ACTION_KEYBINDINGS, ACTION_OPTIONS, ACTION_AUTOPICKUP, ACTION_AUTONOTES,
+        ACTION_OPEN_WIKI, ACTION_OPEN_HHG, ACTION_HELP, ACTION_KEYBINDINGS, ACTION_OPTIONS, ACTION_AUTOPICKUP, ACTION_AUTONOTES,
         ACTION_SAFEMODE, ACTION_DISTRACTION_MANAGER, ACTION_COLOR, ACTION_WORLD_MODS,
         ACTION_ACTIONMENU, ACTION_QUICKSAVE, ACTION_SAVE, ACTION_DEBUG, ACTION_LUA_CONSOLE,
         ACTION_LUA_RELOAD

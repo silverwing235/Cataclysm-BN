@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_ITYPE_H
-#define CATA_SRC_ITYPE_H
 
 #include <array>
 #include <iosfwd>
@@ -104,6 +102,7 @@ struct islot_tool {
 
     itype_id subtype;
 
+    itype_id default_ammo = itype_id::NULL_ID();
     int max_charges = 0;
     int def_charges = 0;
     int charge_factor = 1;
@@ -111,6 +110,8 @@ struct islot_tool {
     int turns_per_charge = 0;
     int turns_active = 0;
     int power_draw = 0;
+    int ups_eff_mult = 1;
+    int ups_recharge_rate = 5;
 
     std::vector<int> rand_charges;
 };
@@ -439,6 +440,25 @@ struct common_ranged_data {
      * Dispersion "bonus" from gun.
      */
     int dispersion = 0;
+    /**
+    * Bonus to the maximum potential multiplier for aimed critical damage.
+    * Additive to the aimed critical damage mult maximum. A bonus of 1 is a potential +100% damage.
+    * Does not add damage directly, skills stats or aimed crit bonus is required to take advantage.
+    */
+    double aimedcritmaxbonus = 0.0;
+    /**
+    * Bonus to the aimed critical damage multiplier.
+    * Will apply to any "goodhit" or better hit (missed_by of 0.5 or less)
+    * Will not raise the aimed critical damage mult above the max potential mult.
+    * A bonus of 0.25 is +25% damage, up to the crit mult max.
+    */
+    double aimedcritbonus = 0.0;
+    /**
+    * Speed of the projectile, in meters per second. Speed of sound in game is roughly 331
+    * Supersonic projectiles can not be fully suppressed.
+    * This is placed here so that guns and gunmods can effect projectile speed.
+    */
+    int speed = 1000;
 };
 
 struct islot_engine {
@@ -526,9 +546,9 @@ struct islot_gun : common_ranged_data {
      */
     int min_cycle_recoil = 0;
     /**
-     * Length of gun barrel, if positive allows sawing down of the barrel
+     * Volume of material removed by sawing down the barrel, if left unspecified barrel can't be sawed down.
      */
-    units::volume barrel_length = 0_ml;
+    units::volume barrel_volume = 0_ml;
     /**
      * Effects that are applied to the ammo when fired.
      */
@@ -562,6 +582,9 @@ struct islot_gun : common_ranged_data {
      *  @note useful for adding recoil effect to guns which otherwise consume no ammo
      */
     int recoil = 0;
+
+    /** How much ammo is consumed per shot. */
+    int ammo_to_fire = 1;
 };
 
 struct islot_gunmod : common_ranged_data {
@@ -595,6 +618,12 @@ struct islot_gunmod : common_ranged_data {
 
     /** Increases base gun UPS consumption by this value per shot */
     int ups_charges_modifier = 0;
+
+    /** Increases base gun ammo to fire by this many times per shot */
+    float ammo_to_fire_multiplier = 1.0f;
+
+    /** Increases base gun ammo to fire by this value per shot */
+    int ammo_to_fire_modifier = 0;
 
     /** Increases gun weight by this many times */
     float weight_multiplier = 1.0f;
@@ -674,7 +703,7 @@ struct islot_ammo : common_ranged_data {
      * Control chance for and state of any items dropped at ranged target
      *@{*/
     itype_id drop = itype_id::NULL_ID();
-
+    int drop_count = -1;
     bool drop_active = true;
     /*@}*/
 
@@ -1088,4 +1117,4 @@ struct itype {
         bool is_seed() const;
 };
 
-#endif // CATA_SRC_ITYPE_H
+

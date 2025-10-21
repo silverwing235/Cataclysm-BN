@@ -1,11 +1,8 @@
 #pragma once
-#ifndef CATA_SRC_ITEM_H
-#define CATA_SRC_ITEM_H
 
 #include <climits>
 #include <cstdint>
 #include <functional>
-#include <list>
 #include <map>
 #include <optional>
 #include <set>
@@ -15,7 +12,7 @@
 #include <vector>
 
 #include "calendar.h"
-#include "cata_arena.h"
+#include "coordinates.h"
 #include "detached_ptr.h"
 #include "enums.h"
 #include "flat_set.h"
@@ -26,7 +23,6 @@
 #include "kill_tracker.h"
 #include "location_vector.h"
 #include "pimpl.h"
-#include "safe_reference.h"
 #include "string_id.h"
 #include "type_id.h"
 #include "units.h"
@@ -98,6 +94,21 @@ struct light_emission {
     short direction;
 };
 extern light_emission nolight;
+
+
+enum cable_state {
+    state_none = 0,
+    state_self,
+    state_grid,
+    state_solar_pack,
+    state_UPS,
+    state_vehicle
+};
+static const std::string p1_name = "p1";
+static const std::string p2_name = "p2";
+static const std::string source_p1_name = "source_" + p1_name;
+static const std::string source_p2_name = "source_" + p2_name;
+static const tripoint_abs_ms tripoint_abs_ms_min( tripoint_min );
 
 /**
  *  Value and metadata for one property of an item
@@ -559,6 +570,9 @@ class item : public location_visitable<item>, public game_object<item>
         /** Burns the item. Returns true if the item was destroyed. */
         bool burn( fire_data &frd );
 
+        // Returns the category id of this item as a string.
+        const std::string &get_category_id() const;
+
         // Returns the category of this item.
         const item_category &get_category() const;
 
@@ -568,7 +582,7 @@ class item : public location_visitable<item>, public game_object<item>
          * @param loc Location of ammo to be reloaded
          * @param qty caps reloading to this (or fewer) units
          */
-        bool reload( player &u, item &loc, int qty );
+        bool reload( Character &who, item &loc, int qty );
 
         template<typename Archive>
         void io( Archive & );
@@ -583,7 +597,7 @@ class item : public location_visitable<item>, public game_object<item>
          * If `practical` is false, returns pre-cataclysm market value,
          * otherwise returns approximate post-cataclysm value.
          */
-        int price( bool practical ) const;
+        auto price( bool practical ) const -> float;
 
         /**
          * Whether two items should stack when displayed in a inventory menu.
@@ -639,6 +653,10 @@ class item : public location_visitable<item>, public game_object<item>
          * takes. The actual time depends heavily on the attacker, see melee.cpp.
          */
         int attack_cost() const;
+        /**
+         * Stamina consumed to use this weapon in melee
+         */
+        int stamina_cost() const;
 
         /** Damage of given type caused when this item is used as melee weapon */
         int damage_melee( damage_type dt ) const;
@@ -753,7 +771,7 @@ class item : public location_visitable<item>, public game_object<item>
                                               std::vector<detached_ptr<item>> &used,
                                               const std::function<bool( const item & )> &filter = return_true<item> );
 
-        /** Permits filthy components, should only be used as a helper in creating filters */
+        /** should only be used as a helper in creating filters */
         bool allow_crafting_component() const;
 
         /**
@@ -797,8 +815,12 @@ class item : public location_visitable<item>, public game_object<item>
          */
         int get_remaining_capacity_for_liquid( const item &liquid, bool allow_bucket = false,
                                                std::string *err = nullptr ) const;
-        int get_remaining_capacity_for_liquid( const item &liquid, const Character &p,
+        int get_remaining_capacity_for_liquid( const item &liquid, const Character &who,
                                                std::string *err = nullptr ) const;
+        /**
+         * How many charges of a given item id this container can hold.
+         */
+        int get_remaining_capacity_for_id( const itype_id &liquid, bool allow_bucket ) const;
         /**
          * It returns the total capacity (volume) of the container for liquids.
          */
@@ -907,7 +929,7 @@ class item : public location_visitable<item>, public game_object<item>
         bool goes_bad() const;
 
         /** whether an item is perishable (can rot), even if it is currently in a preserving container */
-        bool goes_bad_after_opening() const;
+        bool goes_bad_after_opening( bool strict = false ) const;
 
         /** Get the shelf life of the item*/
         time_duration get_shelf_life() const;
@@ -1177,9 +1199,6 @@ class item : public location_visitable<item>, public game_object<item>
          * for other players. The player is identified by its id.
          */
         void mark_as_used_by_player( const player &p );
-        /** Marks the item as filthy, so characters with squeamish trait can't wear it.
-        */
-        bool is_filthy() const;
         /**
          * This is called once each turn. It's usually only useful for active items,
          * but can be called for inactive items without problems.
@@ -1203,16 +1222,10 @@ class item : public location_visitable<item>, public game_object<item>
                                            bool activate,
                                            temperature_flag flag, const weather_manager &weather_generator );
         /*@}*/
-
-        /**
-         * Gets the point (vehicle tile) the cable is connected to.
-         * Returns nothing if not connected to anything.
-         */
-        std::optional<tripoint> get_cable_target( Character *p, const tripoint &pos ) const;
         /**
          * Helper to bring a cable back to its initial state.
          */
-        void reset_cable( player *p );
+        void reset_cable( Character *who = nullptr );
 
         /**
          * Whether the item should be processed (by calling @ref process).
@@ -1229,7 +1242,7 @@ class item : public location_visitable<item>, public game_object<item>
          * @param pos The location of the artifact (should be the player location if carried).
          */
         void process_artifact( player *carrier, const tripoint &pos );
-        void process_relic( Character &carrier );
+        void process_relic( Character *carrier );
 
         bool destroyed_at_zero_charges() const;
         // Most of the is_whatever() functions call the same function in our itype
@@ -1253,7 +1266,7 @@ class item : public location_visitable<item>, public game_object<item>
         bool is_armor() const;
         bool is_book() const;
         bool is_map() const;
-        bool is_salvageable() const;
+        bool is_salvageable( bool strict = false ) const;
         bool is_craft() const;
 
         bool is_deployable() const;
@@ -1295,6 +1308,8 @@ class item : public location_visitable<item>, public game_object<item>
         std::string fuel_pump_terrain() const;
         bool has_explosion_data() const;
         struct fuel_explosion get_explosion_data();
+        float get_kcal_mult() const;
+        void set_kcal_mult( float val );
 
         /**
          * Can this item have given item/itype as content?
@@ -1405,12 +1420,12 @@ class item : public location_visitable<item>, public game_object<item>
          * Callback when a character starts wearing the item. The item is already in the worn
          * items vector and is called from there.
          */
-        void on_wear( Character &p );
+        void on_wear( Character &who );
         /**
          * Callback when a character takes off an item. The item is still in the worn items
          * vector but will be removed immediately after the function returns
          */
-        void on_takeoff( Character &p );
+        void on_takeoff( Character &who );
         /**
          * Callback when a player starts wielding the item. The item is already in the weapon
          * slot and is called from there.
@@ -1423,7 +1438,7 @@ class item : public location_visitable<item>, public game_object<item>
          * and is called from there. This is not called when the item is added to the inventory
          * from worn vector or weapon slot. The item is considered already carried.
          */
-        void on_pickup( Character &p );
+        void on_pickup( Character &who );
         /**
          * Callback when contents of the item are affected in any way other than just processing.
          */
@@ -1499,6 +1514,10 @@ class item : public location_visitable<item>, public game_object<item>
         void erase_var( const std::string &name );
         /** Removes all item variables. */
         void clear_vars();
+        /** Adds child items to the contents of this one. */
+        void add_item_with_id( const itype_id &itype, int count = 1 );
+        /** Checks if this item contains an item with itype. */
+        bool has_item_with_id( const itype_id &itype ) const;
         /*@}*/
 
         /**
@@ -1807,7 +1826,7 @@ class item : public location_visitable<item>, public game_object<item>
         /**
          * Enumerates recipes available from this book and the skill level required to use them.
          */
-        std::vector<std::pair<const recipe *, int>> get_available_recipes( const player &u ) const;
+        std::vector<std::pair<const recipe *, int>> get_available_recipes( const Character &u ) const;
         /*@}*/
 
         /**
@@ -1830,6 +1849,11 @@ class item : public location_visitable<item>, public game_object<item>
          * the same type are not affected by this.
          */
         void add_technique( const matec_id &tech );
+        /**
+         *  Remove the given technique from the item specific @ref techniques.
+         *  Note that other items of the same type are not affected by this.
+         */
+        void remove_technique( const matec_id &tech );
         /*@}*/
 
         /** Returns all toolmods currently attached to this item (always empty if item not a tool) */
@@ -2007,7 +2031,18 @@ class item : public location_visitable<item>, public game_object<item>
          * Summed range value of a gun, including values from mods. Returns 0 on non-gun items.
          */
         int gun_range( bool with_ammo = true ) const;
-
+        /**
+         * Summed projectile speed value (m/s) of a gun, including values from mods. Returns 10 on non-gun items.
+         */
+        int gun_speed( bool with_ammo = true ) const;
+        /**
+         * Summed bonus to the aimed critical base multiplier, including values from mods. Returns 0 on non-gun items.
+         */
+        double gun_aimed_crit_bonus( bool with_ammo = true ) const;
+        /**
+         * Summed bonus to the aimed critical max potential multiplier value of a gun, including values from mods. Returns 0 on non-gun items.
+         */
+        double gun_aimed_crit_max_bonus( bool with_ammo = true ) const;
         /**
          * Get multiplier on recoil considering handling and attached gunmods.
          * @param bipod whether any bipods should be considered
@@ -2196,7 +2231,7 @@ class item : public location_visitable<item>, public game_object<item>
          * Causes a debugmsg if called on non-craft.
          * @param crafter the crafting player
          */
-        void set_next_failure_point( const player &crafter );
+        void set_next_failure_point( const Character &crafter );
 
         /**
          * Handle failure during crafting.
@@ -2204,7 +2239,7 @@ class item : public location_visitable<item>, public game_object<item>
          * @param crafter the crafting player.
          * @return whether the craft being worked on should be entirely destroyed
          */
-        bool handle_craft_failure( player &crafter );
+        bool handle_craft_failure( Character &crafter );
 
         /**
          * Returns requirement data representing what is needed to resume work on an in progress craft.
@@ -2249,9 +2284,6 @@ class item : public location_visitable<item>, public game_object<item>
 
         /** Returns the type of location where the item is found */
         item_location_type where() const;
-
-        /** Returns the position where the item is found */
-        tripoint pos() const;
 
         /** Describes the item location
          *  @param ch if set description is relative to character location */
@@ -2465,18 +2497,9 @@ bool item_ptr_compare_by_charges( const item *left, const item *right );
  */
 inline bool is_crafting_component( const item &component )
 {
-    return ( component.allow_crafting_component() || component.count_by_charges() ) &&
-           !component.is_filthy();
-}
-
-/**
- * This is used in recipes, all other cases use is_crafting_component instead. This allows
- * filthy components to be filtered out in a different manner that allows exceptions.
- */
-inline bool is_crafting_component_allow_filthy( const item &component )
-{
     return ( component.allow_crafting_component() || component.count_by_charges() );
 }
+
 
 namespace charge_removal_blacklist
 {
@@ -2491,4 +2514,151 @@ void load( const JsonObject &jo );
 void reset();
 } // namespace to_cbc_migration
 
-#endif // CATA_SRC_ITEM_H
+struct cable_connection_data {
+    struct connection {
+        cable_state state = state_none;
+        tripoint_abs_ms point = tripoint_abs_ms_min;
+
+        bool is_character() const {
+            return state == state_self;
+        }
+
+        bool empty() const {
+            return state == state_none;
+        }
+
+        bool map_point() const {
+            return state == state_grid || state == state_vehicle;
+        }
+
+        bool point_valid() {
+            return point != tripoint_abs_ms_min;
+        }
+
+        bool operator==( const connection &other ) const {
+            return state == other.state && point == other.point;
+        }
+    };
+    connection con1{};
+    connection con2{};
+
+    bool empty() const {
+        return con1.empty() && con2.empty();
+    }
+
+    bool complete() const {
+        return !con1.empty() && !con2.empty();
+    }
+
+    bool character_only() const {
+        return !complete() && character_connected();
+    }
+
+    bool character_connected() const {
+        return con1.is_character() || con2.is_character();
+    }
+
+    bool has_map_connection() const {
+        return con1.map_point() || con2.map_point();
+    }
+
+    bool intermap_connection() const {
+        return con1.map_point() && con2.map_point();
+    }
+
+    connection *get_map_connection() {
+        if( intermap_connection() ) {
+            return nullptr;
+        } else if( con1.map_point() ) {
+            return &con1;
+        } else if( con2.map_point() ) {
+            return &con2;
+        }
+        return nullptr;
+    }
+
+    connection *get_nonchar_connection() {
+        if( !con1.is_character() && !con1.empty() ) {
+            return &con1;
+        } else if( !con2.is_character() && !con2.empty() ) {
+            return &con2;
+        }
+        return nullptr;
+    }
+
+    void set_vars( item *const cable ) const {
+        if( !cable ) {
+            return;
+        }
+        if( !con1.empty() ) {
+            cable->set_var( p1_name, con1.state );
+            if( con1.point != tripoint_abs_ms_min ) {
+                cable->set_var( source_p1_name, con1.point.raw() );
+            }
+        }
+        if( !con2.empty() ) {
+            cable->set_var( p2_name, con2.state );
+            if( con2.point != tripoint_abs_ms_min ) {
+                cable->set_var( source_p2_name, con2.point.raw() );
+            }
+        }
+    }
+    static bool ups_connected( const item *const cable );
+
+    static void unset_vars( item *const cable ) {
+        unset_con1( cable );
+        unset_con2( cable );
+    }
+    void unset_con( item *const cable, connection &con ) {
+        if( con == con1 ) {
+            unset_con1( cable );
+        } else if( con == con2 ) {
+            unset_con2( cable );
+        }
+    }
+    void unset_other_con( item *const cable, connection &con ) {
+        if( con == con1 ) {
+            unset_con2( cable );
+        } else if( con == con2 ) {
+            unset_con1( cable );
+        }
+    }
+    static void unset_con1( item *const cable ) {
+        if( !cable ) {
+            return;
+        }
+        cable->erase_var( p1_name );
+        cable->erase_var( source_p1_name );
+    }
+    static void unset_con2( item *const cable ) {
+        if( !cable ) {
+            return;
+        }
+        cable->erase_var( p2_name );
+        cable->erase_var( source_p2_name );
+    }
+
+    static std::optional<cable_connection_data> make_data( const item *const cable ) {
+        if( cable ) {
+            return make_data( *cable );
+        } else {
+            return std::nullopt;
+        }
+    }
+
+    static std::optional<cable_connection_data> make_data( const item &cable );
+
+    cable_connection_data( const item &cable ) {
+
+        con1.state = cable_state( cable.get_var( p1_name, 0.0 ) );
+        con2.state = cable_state( cable.get_var( p2_name, 0.0 ) );
+
+        auto tmp = cable.get_var( source_p1_name, tripoint_min );
+        con1.point = tripoint_abs_ms( tmp );
+
+        tmp = cable.get_var( source_p2_name, tripoint_min );
+        con2.point = tripoint_abs_ms( tmp );
+    }
+};
+
+

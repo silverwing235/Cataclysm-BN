@@ -68,74 +68,74 @@ std::vector<efftype_id> find_all_effect_types()
 {
     std::vector<efftype_id> all;
     all.reserve( effect_types.size() );
-    std::transform( effect_types.begin(), effect_types.end(), std::back_inserter( all ),
+    std::ranges::transform( effect_types, std::back_inserter( all ),
     []( const std::pair<efftype_id, effect_type> &pr ) {
         return pr.first;
     } );
     return all;
 }
 
-void weed_msg( player &p )
+void weed_msg( Character &who )
 {
-    const time_duration howhigh = p.get_effect_dur( effect_weed_high );
+    const time_duration howhigh = who.get_effect_dur( effect_weed_high );
     ///\EFFECT_INT changes messages when smoking weed
-    int smarts = p.get_int();
+    int smarts = who.get_int();
     if( howhigh > 12_minutes && one_in( 7 ) ) {
         int msg = rng( 0, 5 );
         switch( msg ) {
             case 0:
                 // Freakazoid
-                p.add_msg_if_player(
+                who.add_msg_if_player(
                     _( "The scariest thing in the world would be… if all the air in the world turned to WOOD!" ) );
                 return;
             case 1:
                 // Simpsons
-                p.add_msg_if_player(
+                who.add_msg_if_player(
                     _( "Could Jesus microwave a burrito so hot, that he himself couldn't eat it?" ) );
-                p.mod_stored_kcal( -20 );
+                who.mod_stored_kcal( -20 );
                 return;
             case 2:
                 if( smarts > 8 ) {
                     // Timothy Leary
-                    p.add_msg_if_player( _( "Science is all metaphor." ) );
+                    who.add_msg_if_player( _( "Science is all metaphor." ) );
                 } else if( smarts < 3 ) {
                     // It's Always Sunny in Philadelphia
-                    p.add_msg_if_player( _( "Science is a liar sometimes." ) );
+                    who.add_msg_if_player( _( "Science is a liar sometimes." ) );
                 } else {
                     // Durr
-                    p.add_msg_if_player( _( "Science is… wait, what was I talking about again?" ) );
+                    who.add_msg_if_player( _( "Science is… wait, what was I talking about again?" ) );
                 }
                 return;
             case 3:
                 // Dazed and Confused
-                p.add_msg_if_player(
+                who.add_msg_if_player(
                     _( "Behind every good man there is a woman, and that woman was Martha Washington, man." ) );
                 if( one_in( 2 ) ) {
-                    p.add_msg_if_player(
+                    who.add_msg_if_player(
                         _( "Every day, George would come home, and she would have a big fat bowl waiting for him when he came in the door, man." ) );
                     if( one_in( 2 ) ) {
-                        p.add_msg_if_player( _( "She was a hip, hip, hip lady, man." ) );
+                        who.add_msg_if_player( _( "She was a hip, hip, hip lady, man." ) );
                     }
                 }
                 return;
             case 4:
-                if( p.has_amount( itype_money_bundle, 1 ) ) { // Half Baked
-                    p.add_msg_if_player( _( "You ever see the back of a twenty dollar bill… on weed?" ) );
+                if( who.has_amount( itype_money_bundle, 1 ) ) { // Half Baked
+                    who.add_msg_if_player( _( "You ever see the back of a twenty dollar bill… on weed?" ) );
                     if( one_in( 2 ) ) {
-                        p.add_msg_if_player(
+                        who.add_msg_if_player(
                             _( "Oh, there's some crazy shit, man.  There's a dude in the bushes.  Has he got a gun?  I dunno!" ) );
                         if( one_in( 3 ) ) {
-                            p.add_msg_if_player( _( "RED TEAM GO, RED TEAM GO!" ) );
+                            who.add_msg_if_player( _( "RED TEAM GO, RED TEAM GO!" ) );
                         }
                     }
-                } else if( p.has_amount( itype_holybook_bible, 1 ) ) {
-                    p.add_msg_if_player( _( "You have a sudden urge to flip your bible open to Genesis 1:29…" ) );
+                } else if( who.has_amount( itype_holybook_bible, 1 ) ) {
+                    who.add_msg_if_player( _( "You have a sudden urge to flip your bible open to Genesis 1:29…" ) );
                 } else { // Big Lebowski
-                    p.add_msg_if_player( _( "That rug really tied the room together…" ) );
+                    who.add_msg_if_player( _( "That rug really tied the room together…" ) );
                 }
                 return;
             case 5:
-                p.add_msg_if_player( _( "I used to do drugs…  I still do, but I used to, too." ) );
+                who.add_msg_if_player( _( "I used to do drugs…  I still do, but I used to, too." ) );
             default:
                 return;
         }
@@ -144,44 +144,44 @@ void weed_msg( player &p )
         switch( msg ) {
             case 0:
                 // Bob Marley
-                p.add_msg_if_player( _( "The herb reveals you to yourself." ) );
+                who.add_msg_if_player( _( "The herb reveals you to yourself." ) );
                 return;
             case 1:
                 // Freakazoid
-                p.add_msg_if_player(
+                who.add_msg_if_player(
                     _( "Okay, like, the scariest thing in the world would be… if like you went to grab something and it wasn't there!" ) );
                 return;
             case 2:
                 // Simpsons
-                p.add_msg_if_player( _( "They call them fingers, but I never see them fing." ) );
+                who.add_msg_if_player( _( "They call them fingers, but I never see them fing." ) );
                 if( smarts > 2 && one_in( 2 ) ) {
-                    p.add_msg_if_player( _( "…oh, there they go." ) );
+                    who.add_msg_if_player( _( "…oh, there they go." ) );
                 }
                 return;
             case 3:
                 // Bill Hicks
-                p.add_msg_if_player(
+                who.add_msg_if_player(
                     _( "You suddenly realize that all matter is merely energy condensed to a slow vibration, and we are all one consciousness experiencing itself subjectively." ) );
                 return;
             case 4:
                 // Steve Martin
-                p.add_msg_if_player( _( "I usually only smoke in the late evening." ) );
+                who.add_msg_if_player( _( "I usually only smoke in the late evening." ) );
                 if( one_in( 4 ) ) {
-                    p.add_msg_if_player(
+                    who.add_msg_if_player(
                         _( "Oh, occasionally the early evening, but usually the late evening, or the mid-evening." ) );
                 }
                 if( one_in( 4 ) ) {
-                    p.add_msg_if_player( _( "Just the early evening, mid-evening and late evening." ) );
+                    who.add_msg_if_player( _( "Just the early evening, mid-evening and late evening." ) );
                 }
                 if( one_in( 4 ) ) {
-                    p.add_msg_if_player(
+                    who.add_msg_if_player(
                         _( "Occasionally, early afternoon, early mid-afternoon, or perhaps the late mid-afternoon." ) );
                 }
                 if( one_in( 4 ) ) {
-                    p.add_msg_if_player( _( "Oh, sometimes the early-mid-late-early-morning." ) );
+                    who.add_msg_if_player( _( "Oh, sometimes the early-mid-late-early-morning." ) );
                 }
                 if( smarts > 2 ) {
-                    p.add_msg_if_player( _( "…But never at dusk." ) );
+                    who.add_msg_if_player( _( "…But never at dusk." ) );
                 }
                 return;
             case 5:
@@ -193,29 +193,29 @@ void weed_msg( player &p )
         switch( msg ) {
             case 0:
                 // Cheech and Chong
-                p.add_msg_if_player( _( "Dave's not here, man." ) );
+                who.add_msg_if_player( _( "Dave's not here, man." ) );
                 return;
             case 1:
                 // Real Life
-                p.add_msg_if_player( _( "Man, a cheeseburger sounds SO awesome right now." ) );
-                p.mod_stored_kcal( -40 );
-                if( p.has_trait( trait_VEGETARIAN ) ) {
-                    p.add_msg_if_player( _( "Eh… maybe not." ) );
-                } else if( p.has_trait( trait_LACTOSE ) ) {
-                    p.add_msg_if_player( _( "I guess, maybe, without the cheese… yeah." ) );
+                who.add_msg_if_player( _( "Man, a cheeseburger sounds SO awesome right now." ) );
+                who.mod_stored_kcal( -40 );
+                if( who.has_trait( trait_VEGETARIAN ) ) {
+                    who.add_msg_if_player( _( "Eh… maybe not." ) );
+                } else if( who.has_trait( trait_LACTOSE ) ) {
+                    who.add_msg_if_player( _( "I guess, maybe, without the cheese… yeah." ) );
                 }
                 return;
             case 2:
                 // Dazed and Confused
-                p.add_msg_if_player( _( "Walkin' down the hall, by myself, smokin' a j with fifty elves." ) );
+                who.add_msg_if_player( _( "Walkin' down the hall, by myself, smokin' a j with fifty elves." ) );
                 return;
             case 3:
                 // Half Baked
-                p.add_msg_if_player( _( "That weed was the shiz-nittlebam snip-snap-sack." ) );
+                who.add_msg_if_player( _( "That weed was the shiz-nittlebam snip-snap-sack." ) );
                 return;
             case 4:
                 // re-roll
-                weed_msg( p );
+                weed_msg( who );
             case 5:
             default:
                 return;
@@ -472,6 +472,10 @@ game_message_type effect_type::lose_game_message_type() const
             // Should never happen
             return m_neutral;
     }
+}
+std::string effect_type::get_looks_like() const
+{
+    return looks_like;
 }
 std::string effect_type::get_apply_message() const
 {
@@ -1305,6 +1309,7 @@ void load_effect_type( const JsonObject &jo )
     } else {
         new_etype.reduced_desc = new_etype.desc;
     }
+    new_etype.looks_like = jo.get_string( "looks_like", "" );
 
     new_etype.part_descs = jo.get_bool( "part_descs", false );
 
@@ -1387,8 +1392,8 @@ void load_effect_type( const JsonObject &jo )
 
     assign( jo, "morale", new_etype.morale );
 
-    const auto morale_effect = std::find_if( new_etype.mod_data.begin(),
-    new_etype.mod_data.end(), []( decltype( *new_etype.mod_data.begin() ) & pr ) {
+    const auto morale_effect = std::ranges::find_if( new_etype.mod_data,
+    []( decltype( *new_etype.mod_data.begin() ) & pr ) {
         return std::get<2>( pr.first ) == "MORALE";
     } );
     bool has_morale_effect = morale_effect != new_etype.mod_data.end();

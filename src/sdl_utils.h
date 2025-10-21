@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_SDL_UTILS_H
-#define CATA_SRC_SDL_UTILS_H
 
 #include <algorithm>
 #include <cmath>
@@ -40,6 +38,10 @@ SDL_Color color_pixel_nightvision( const SDL_Color &color );
 
 SDL_Color color_pixel_overexposed( const SDL_Color &color );
 
+SDL_Color color_pixel_underwater( const SDL_Color &color );
+
+SDL_Color color_pixel_underwater_dark( const SDL_Color &color );
+
 SDL_Color color_pixel_darken( const SDL_Color &color );
 
 SDL_Color color_pixel_sepia( const SDL_Color &color );
@@ -67,4 +69,4 @@ SDL_Rect fit_rect_inside( const SDL_Rect &inner, const SDL_Rect &outer );
 std::vector<SDL_Color> color_linear_interpolate( const SDL_Color &start_color,
         const SDL_Color &end_color, unsigned additional_steps );
 
-#endif // CATA_SRC_SDL_UTILS_H
+

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_INIT_H
-#define CATA_SRC_INIT_H
 
 #include <functional>
 #include <list>
@@ -182,8 +180,9 @@ class DynamicDataLoader
 namespace init
 {
 
-/** Load (or reload) mods' main Lua scripts. */
-void load_main_lua_scripts( cata::lua_state &state, const std::vector<mod_id> &packs );
+/// Load (or reload) mods' main Lua scripts.
+/// @returns the number of loaded scripts.
+auto load_main_lua_scripts( cata::lua_state &state, const std::vector<mod_id> &packs ) -> int;
 
 /** Returns whether the game data is currently loaded. */
 bool is_data_loaded();
@@ -221,4 +220,4 @@ bool check_mods_for_errors( loading_ui &ui, const std::vector<mod_id> &opts );
 
 } // namespace init
 
-#endif // CATA_SRC_INIT_H
+

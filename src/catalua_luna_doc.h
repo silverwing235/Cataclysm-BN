@@ -1,8 +1,7 @@
 #pragma once
-#ifndef CATA_SRC_CATALUA_LUNA_DOC_H
-#define CATA_SRC_CATALUA_LUNA_DOC_H
 
 #include "catalua_luna.h"
+#include "mission.h"
 #include "type_id.h"
 #include "concepts_utility.h"
 
@@ -19,6 +18,9 @@ enum mf_attitude : int;
 enum monster_attitude : int;
 enum npc_attitude : int;
 enum npc_need : int;
+enum mission_origin : int;
+enum mission_goal : int;
+
 namespace sfx
 {
 enum class channel : int;
@@ -33,9 +35,12 @@ class distribution_grid_tracker;
 class effect_type;
 class item;
 class item_stack;
+class ma_technique;
 class ma_buff;
 class map;
 class map_stack;
+class material_type;
+class mission;
 class monster;
 class npc;
 class player;
@@ -46,6 +51,7 @@ class SkillLevel;
 class SkillLevelMap;
 class spell_type;
 class spell;
+class string_input_popup;
 class time_duration;
 class time_point;
 class tinymap;
@@ -57,11 +63,14 @@ struct dealt_damage_instance;
 struct fake_spell;
 struct field_type;
 struct mutation_branch;
+struct mission_type;
 struct npc_opinion;
 struct npc_personality;
 struct point;
 struct species_type;
 struct tripoint;
+struct trap;
+struct uilist_entry;
 namespace units
 {
 template<Arithmetic V, typename U>
@@ -117,12 +126,15 @@ LUNA_VAL( item, "Item" );
 LUNA_VAL( item_stack, "ItemStack" );
 LUNA_VAL( map, "Map" );
 LUNA_VAL( map_stack, "MapStack" );
+LUNA_VAL( mission, "Mission" );
+LUNA_VAL( mission_type, "MissionType" );
 LUNA_VAL( monster, "Monster" );
 LUNA_VAL( npc, "Npc" );
 LUNA_VAL( npc_opinion, "NpcOpinion" );
 LUNA_VAL( npc_personality, "NpcPersonality" );
 LUNA_VAL( player, "Player" );
 LUNA_VAL( point, "Point" );
+LUNA_VAL( string_input_popup, "PopupInputStr" );
 LUNA_VAL( query_popup, "QueryPopup" );
 LUNA_VAL( SkillLevelMap, "SkillLevelMap" );
 LUNA_VAL( SkillLevel, "SkillLevel" );
@@ -133,6 +145,7 @@ LUNA_VAL( time_point, "TimePoint" );
 LUNA_VAL( tinymap, "Tinymap" );
 LUNA_VAL( tripoint, "Tripoint" );
 LUNA_VAL( uilist, "UiList" );
+LUNA_VAL( uilist_entry, "UiListEntry" );
 LUNA_VAL( units::angle, "Angle" );
 LUNA_VAL( units::energy, "Energy" );
 LUNA_VAL( units::mass, "Mass" );
@@ -152,8 +165,12 @@ LUNA_ID( itype, "Itype" )
 LUNA_ID( json_flag, "JsonFlag" )
 LUNA_ID( json_trait_flag, "JsonTraitFlag" )
 LUNA_ID( ma_buff, "MartialArtsBuff" )
+LUNA_ID( ma_technique, "MartialArtsTechnique" )
+LUNA_ID( material_type, "MaterialType" )
 LUNA_ID( monfaction, "MonsterFaction" )
 LUNA_ID( morale_type_data, "MoraleTypeData" )
+LUNA_ID( mission_type_id, "MissionTypeId" )
+LUNA_ID( mtype, "Mtype" )
 LUNA_ID( mutation_branch, "MutationBranch" )
 LUNA_ID( mutation_category_trait, "MutationCategoryTrait" )
 LUNA_ID( recipe, "Recipe" )
@@ -161,6 +178,7 @@ LUNA_ID( Skill, "Skill" )
 LUNA_ID( species_type, "SpeciesType" )
 LUNA_ID( spell_type, "SpellType" )
 LUNA_ID( ter_t, "Ter" )
+LUNA_ID( trap, "Trap" )
 
 // Enums
 LUNA_ENUM( add_type, "AddictionType" )
@@ -176,6 +194,8 @@ LUNA_ENUM( creature_size, "MonsterSize" )
 LUNA_ENUM( npc_attitude, "NpcAttitude" )
 LUNA_ENUM( npc_need, "NpcNeed" )
 LUNA_ENUM( sfx::channel, "SfxChannel" )
+LUNA_ENUM( mission_origin, "MissionOrigin" )
+LUNA_ENUM( mission_goal, "MissionGoal" )
 
 
-#endif // CATA_SRC_CATALUA_LUNA_DOC_H
+

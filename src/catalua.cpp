@@ -4,101 +4,11 @@
 
 constexpr int LUA_API_VERSION = 2;
 
-#ifndef LUA
-
-#include "popup.h"
-
-namespace cata
-{
-
-// It's a dud
-struct lua_state {
-    lua_state() = default;
-    ~lua_state() = default;
-};
-
-bool has_lua()
-{
-    return false;
-}
-
-std::string get_lapi_version_string()
-{
-    return "<none>";
-}
-
-void startup_lua_test()
-{
-    // Nothing to do here
-}
-
-bool generate_lua_docs()
-{
-    // Nothing to do here
-    return false;
-}
-
-void show_lua_console()
-{
-    query_popup()
-    .default_color( c_red )
-    .allow_anykey( true )
-    .message( "%s", "Can't open Lua console:\nthe game was compiled without Lua support." )
-    .query();
-}
-
-void reload_lua_code()
-{
-    query_popup()
-    .default_color( c_red )
-    .allow_anykey( true )
-    .message( "%s", "Can't reload Lua code:\nthe game was compiled without Lua support." )
-    .query();
-}
-
-void debug_write_lua_backtrace( std::ostream &/*out*/ )
-{
-    // Nothing to do here
-}
-
-bool save_world_lua_state( const world *world, const std::string & )
-{
-    return true;
-}
-
-bool load_world_lua_state( const world *world, const std::string & )
-{
-    return true;
-}
-
-std::unique_ptr<lua_state, lua_state_deleter> make_wrapped_state()
-{
-    return std::unique_ptr<lua_state, lua_state_deleter>(
-               new lua_state{}, lua_state_deleter{}
-           );
-}
-
-void init_global_state_tables( lua_state &, const std::vector<mod_id> & ) {}
-void set_mod_being_loaded( lua_state &, const mod_id & ) {}
-void clear_mod_being_loaded( lua_state & ) {}
-void run_mod_preload_script( lua_state &, const mod_id & ) {}
-void run_mod_finalize_script( lua_state &, const mod_id & ) {}
-void run_mod_main_script( lua_state &, const mod_id & ) {}
-void reg_lua_iuse_actors( lua_state &, Item_factory & ) {}
-
-template<typename... Args>
-void run_hooks( Args &&... ) {}
-
-void run_on_every_x_hooks( lua_state & ) {}
-
-} // namespace cata
-
-#else // LUA
-
 #include "catalua_sol.h"
 
 #include "avatar.h"
 #include "catalua_console.h"
+#include "catalua_hooks.h"
 #include "catalua_impl.h"
 #include "catalua_iuse_actor.h"
 #include "catalua_readonly.h"
@@ -108,6 +18,7 @@ void run_on_every_x_hooks( lua_state & ) {}
 #include "init.h"
 #include "item_factory.h"
 #include "map.h"
+#include "messages.h"
 #include "mod_manager.h"
 #include "path_info.h"
 #include "point.h"
@@ -115,11 +26,6 @@ void run_on_every_x_hooks( lua_state & ) {}
 
 namespace cata
 {
-
-bool has_lua()
-{
-    return true;
-}
 
 std::string get_lapi_version_string()
 {
@@ -137,18 +43,19 @@ void startup_lua_test()
     }
 }
 
-bool generate_lua_docs()
+auto generate_lua_docs( const std::filesystem::path &script_path,
+                        const std::filesystem::path &to ) -> bool
 {
     sol::state lua = make_lua_state();
     lua.globals()["doc_gen_func"] = lua.create_table();
-    std::string lua_doc_script = PATH_INFO::datadir() + "raw/generate_docs.lua";
+
     try {
-        run_lua_script( lua, lua_doc_script );
+        run_lua_script( lua, script_path.string() );
         sol::protected_function doc_gen_func = lua["doc_gen_func"]["impl"];
         sol::protected_function_result res = doc_gen_func();
         check_func_result( res );
         std::string ret = res;
-        write_to_file( PATH_INFO::lua_doc_output(), [&]( std::ostream & s ) {
+        write_to_file( to.string(), [&]( std::ostream & s ) -> void {
             s << ret;
         } );
     } catch( std::runtime_error &e ) {
@@ -168,7 +75,8 @@ void reload_lua_code()
     cata::lua_state &state = *DynamicDataLoader::get_instance().lua;
     const auto &packs = world_generator->active_world->info->active_mod_order;
     try {
-        init::load_main_lua_scripts( state, packs );
+        const int lua_mods = init::load_main_lua_scripts( state, packs );
+        add_msg( m_good, _( "Reloaded %1$d lua mods." ), lua_mods );
     } catch( std::runtime_error &e ) {
         debugmsg( "%s", e.what() );
     }
@@ -299,21 +207,27 @@ void init_global_state_tables( lua_state &state, const std::vector<mod_id> &modl
     gt["iuse_functions"] = lua.create_table();
 
     // hooks
-    hooks["on_game_load"] = lua.create_table();
-    hooks["on_game_save"] = lua.create_table();
-    hooks["on_mapgen_postprocess"] = lua.create_table();
+    cata::define_hooks( state );
 }
 
 void set_mod_being_loaded( lua_state &state, const mod_id &mod )
 {
     sol::state &lua = state.lua;
     lua.globals()["game"]["current_mod"] = mod.str();
+    lua.globals()["game"]["current_mod_path"] = mod->path + "/";
+    lua.globals()["package"]["path"] =
+        string_format(
+            "%1$s/?.lua;%1$s/?/init.lua;%2$s/?.lua;%2$s/?/init.lua",
+            PATH_INFO::datadir() + "/lua", mod->path
+        );
 }
 
 void clear_mod_being_loaded( lua_state &state )
 {
     sol::state &lua = state.lua;
     lua.globals()["game"]["current_mod"] = sol::nil;
+    lua.globals()["game"]["current_mod_path"] = sol::nil;
+    lua.globals()["package"]["path"] = sol::nil;
 }
 
 void run_mod_preload_script( lua_state &state, const mod_id &mod )
@@ -349,24 +263,44 @@ void run_mod_main_script( lua_state &state, const mod_id &mod )
     run_lua_script( state.lua, script_path );
 }
 
-template<typename... Args>
-void run_hooks( lua_state &state, std::string_view hooks_table, Args &&...args )
+void run_hooks( std::string_view hook_name )
+{
+    lua_state &state = *DynamicDataLoader::get_instance().lua;
+    run_hooks( state, hook_name, []( sol::table & ) {} );
+}
+void run_hooks( lua_state &state, std::string_view hook_name )
+{
+    run_hooks( state, hook_name, []( sol::table & ) {} );
+}
+void run_hooks( std::string_view hook_name,
+                std::function < auto( sol::table &params ) -> void > init )
+{
+    lua_state &state = *DynamicDataLoader::get_instance().lua;
+    run_hooks( state, hook_name, init );
+}
+void run_hooks( lua_state &state, std::string_view hook_name,
+                std::function < auto( sol::table &params ) -> void > init )
 {
     sol::state &lua = state.lua;
-    sol::table hooks = lua.globals()["game"]["hooks"][hooks_table];
+    sol::table hooks = lua.globals()["game"]["hooks"][hook_name];
+
+    auto params = lua.create_table();
+    init( params );
+
     for( auto &ref : hooks ) {
         int idx = -1;
         try {
             idx = ref.first.as<int>();
             sol::protected_function func = ref.second;
-            sol::protected_function_result res = func( std::forward<Args>( args )... );
+            sol::protected_function_result res = func( params );
             check_func_result( res );
         } catch( std::runtime_error &e ) {
-            debugmsg( "Failed to run hook %s[%d]: %s", hooks_table, idx, e.what() );
+            debugmsg( "Failed to run hook %s[%d]: %s", hook_name, idx, e.what() );
             break;
         }
     }
 }
+
 
 void reg_lua_iuse_actors( lua_state &state, Item_factory &ifactory )
 {
@@ -391,26 +325,33 @@ void run_on_every_x_hooks( lua_state &state )
 {
     std::vector<cata::on_every_x_hooks> &master_table =
         state.lua["game"]["cata_internal"]["on_every_x_hooks"];
-    for( const auto &entry : master_table ) {
+    for( auto &entry : master_table ) {
         if( calendar::once_every( entry.interval ) ) {
-            for( auto &func : entry.functions ) {
+            entry.functions.erase(
+                std::remove_if(
+                    entry.functions.begin(), entry.functions.end(),
+            [&entry]( auto & func ) {
                 try {
                     sol::protected_function_result res = func();
                     check_func_result( res );
+                    // erase function only if it returns a boolean AND it's false
+                    return res.get_type() == sol::type::boolean && !res.get<bool>();
                 } catch( std::runtime_error &e ) {
                     debugmsg(
                         "Failed to run hook on_every_x(interval = %s): %s",
                         to_string( entry.interval ), e.what()
                     );
                 }
+                return false;
             }
+                ),
+            entry.functions.end()
+            );
         }
     }
 }
 
 } // namespace cata
-
-#endif // LUA
 
 namespace cata
 {
@@ -438,7 +379,11 @@ void run_on_game_load_hooks( lua_state &state )
 void run_on_mapgen_postprocess_hooks( lua_state &state, map &m, const tripoint &p,
                                       const time_point &when )
 {
-    run_hooks( state, "on_mapgen_postprocess", m, p, when );
+    run_hooks( state, "on_mapgen_postprocess", [&]( sol::table & params ) {
+        params["map"] = &m;
+        params["omt"] = p;
+        params["when"] = when;
+    } );
 }
 
 } // namespace cata

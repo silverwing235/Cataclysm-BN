@@ -389,7 +389,7 @@ void submap::update_legacy_computer()
 
 bool submap::has_computer( point p ) const
 {
-    return computers.find( p ) != computers.end() || ( legacy_computer && ter[p.x][p.y] == t_console );
+    return computers.contains( p ) || ( legacy_computer && ter[p.x][p.y] == t_console );
 }
 
 const computer *submap::get_computer( point p ) const
@@ -437,8 +437,8 @@ void submap::delete_computer( point p )
 
 bool submap::contains_vehicle( vehicle *veh )
 {
-    const auto match = std::find_if(
-                           begin( vehicles ), end( vehicles ),
+    const auto match = std::ranges::find_if(
+                           vehicles,
     [veh]( const std::unique_ptr<vehicle> &v ) {
         return v.get() == veh;
     } );

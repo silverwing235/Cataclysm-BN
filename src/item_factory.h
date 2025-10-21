@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_ITEM_FACTORY_H
-#define CATA_SRC_ITEM_FACTORY_H
 
 #include <functional>
 #include <list>
@@ -237,6 +235,9 @@ class Item_factory
 
         std::list<itype_id> subtype_replacement( const itype_id & ) const;
 
+        // For very rare cases
+        use_function usage_from_string( const std::string &type ) const;
+
     private:
         /** Set at finalization and prevents alterations to the static item templates */
         bool frozen = false;
@@ -309,10 +310,13 @@ class Item_factory
 
         void set_use_methods_from_json( const JsonObject &jo, const std::string &member,
                                         std::map<std::string, use_function> &use_methods );
-
-        use_function usage_from_string( const std::string &type ) const;
+        void set_use_methods_from_array( const JsonArray &array,
+                                         std::map<std::string, use_function> &use_methods );
 
         std::pair<std::string, use_function> usage_from_object( const JsonObject &obj );
+
+        static std::optional<JsonArray> extend_has_member( const JsonObject &jo,
+                const std::string &member );
 
         /**
          * Helper function for Item_group loading
@@ -334,7 +338,6 @@ class Item_factory
 
         void load_basic_info( const JsonObject &jo, itype &def, const std::string &src );
         void set_qualities_from_json( const JsonObject &jo, const std::string &member, itype &def );
-        void extend_qualities_from_json( const JsonObject &jo, const std::string &member, itype &def );
         void delete_qualities_from_json( const JsonObject &jo, const std::string &member, itype &def );
         void set_properties_from_json( const JsonObject &jo, const std::string &member, itype &def );
 
@@ -380,5 +383,3 @@ class Item_factory
 
         std::set<std::string> repair_actions;
 };
-
-#endif // CATA_SRC_ITEM_FACTORY_H

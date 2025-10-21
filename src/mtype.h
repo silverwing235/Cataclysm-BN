@@ -1,25 +1,27 @@
 #pragma once
-#ifndef CATA_SRC_MTYPE_H
-#define CATA_SRC_MTYPE_H
 
 #include <map>
 #include <optional>
 #include <set>
 #include <array>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "behavior.h"
 #include "calendar.h"
 #include "color.h"
+#include "cursesdef.h"
 #include "damage.h"
 #include "enum_bitset.h"
 #include "enums.h"
 #include "mattack_common.h"
+#include "legacy_pathfinding.h"
 #include "pathfinding.h"
 #include "translations.h"
 #include "type_id.h"
 #include "units.h"
+#include "catalua_type_operators.h"
 
 class Creature;
 class monster;
@@ -34,6 +36,7 @@ using mon_action_death  = void ( * )( monster & );
 using mon_action_attack = bool ( * )( monster * );
 using mon_action_defend = void ( * )( monster &, Creature *, dealt_projectile_attack const * );
 using bodytype_id = std::string;
+using TraitSet = std::set<trait_id>;
 class JsonArray;
 class JsonObject;
 
@@ -102,7 +105,10 @@ enum m_flag : int {
     MF_SLUDGEPROOF,         // Ignores the effect of sludge trails
     MF_SLUDGETRAIL,         // Causes monster to leave a sludge trap trail when moving
     MF_COLDPROOF,           // Immune to cold damage
-    MF_BIOPROOF,     // Immune to biological damage
+    MF_BIOPROOF,            // Immune to biological damage
+    MF_DARKPROOF,           // Immune to dark damage
+    MF_LIGHTPROOF,          // Immune to light damage
+    MF_PSIPROOF,            // Immune to psionic damage
     MF_FIREY,               // Burns stuff and is immune to fire
     MF_QUEEN,               // When it dies, local populations start to die off too
     MF_ELECTRONIC,          // e.g. a robot; affected by EMP blasts, and other stuff
@@ -142,7 +148,7 @@ enum m_flag : int {
     MF_CBM_OP,              // May produce a bionic from bionics_op when butchered, and the power storage is mk 2.
     MF_CBM_TECH,            // May produce a bionic from bionics_tech when butchered.
     MF_CBM_SUBS,            // May produce a bionic from bionics_subs when butchered.
-    MF_FILTHY,              // Any clothing it drops will be filthy.
+    MF_UNUSED_76,           // !! Unused Flag position, kept for compatability purposes
     MF_FISHABLE,            // It is fishable.
     MF_GROUP_BASH,          // Monsters that can pile up against obstacles and add their strength together to break them.
     MF_SWARMS,              // Monsters that like to group together and form loose packs
@@ -178,6 +184,19 @@ enum m_flag : int {
     MF_STUN_IMMUNE,         // This monster is immune to the stun effect
     MF_DROPS_AMMO,          // This monster drops ammo. Check to make sure starting_ammo paramter is present for this monster type!
     MF_CAN_BE_ORDERED,      // If friendly, allow setting this monster to ignore hostiles and prioritize following the player.
+    MF_SMALL_HEAD,          // This monster has a smaller head in proportion to the rest of its body than usual, making it 20% harder to shoot the head. 0.1 -> 0.08
+    MF_TINY_HEAD,           // This monster has a tiny head in proportion to the rest of its body, making it 50% hard to shoot the head. 0.1 -> 0.05
+    MF_NO_HEAD_BONUS_CRIT,  // This monster can still be hit in the head, but cannot be dealt extra damage past the 1.5 multiplier.
+    MF_HEAD_BONUS_MAX_CRIT_1,       // This monster has a vulnerable head, increasing the maximum potential critical multiplier by 0.5 (50%)
+    MF_HEAD_BONUS_MAX_CRIT_2,       // This monster has a extremely vulnerable head, increasing the maximum potential critical multiplier by 1.0 (100%)
+    MF_TORSO_BONUS_MAX_CRIT_1,      // This monster has a vulnerable torso, increasing the maximum potential critical multiplier by 0.25 (25%)
+    MF_TORSO_BONUS_MAX_CRIT_2,      // This monster has a extremely vulnerable torso, increasing the maximum potential critical multiplier by 0.5 (50%)
+    MF_PROJECTILE_RESISTANT_1,      // This monster has a torso and limbs that are notably resistant to projectiles, with a default x1 damage mult cap.
+    MF_PROJECTILE_RESISTANT_2,      // This monster has a torso and limbs that are very resistant to projectiles, with a default x0.8 damage mult cap.
+    MF_PROJECTILE_RESISTANT_3,      // This monster has a torso and limbs that are extremely resistant to projectiles, with a default x0.5 damage mult cap.
+    MF_PROJECTILE_RESISTANT_4,      // This monster has a torso and limbs that are almost immune to projectiles, with a default x0.2 damage mult cap.
+    MF_VOLATILE,            // This monster tends to explode if hit by fire or bullets, fire weapons will always catch them on fire.
+
     MF_MAX                  // Sets the length of the flags - obviously must be LAST
 };
 
@@ -206,6 +225,7 @@ struct mon_effect_data {
 /** Pet food data */
 struct pet_food_data {
     std::set<std::string> food;
+    std::set<TraitSet> tamer_traits;
     std::string pet;
     std::string feed;
 
@@ -295,6 +315,8 @@ struct mtype {
         // Will stop fleeing if at max hp, and regen anger and morale.
         bool regen_morale = false;
 
+        void faction_display( catacurses::window &w, const point &top_left, const int width ) const;
+
         // mountable ratio for rider weight vs. mount weight, default 0.3
         float mountable_weight_ratio = 0.3;
 
@@ -315,7 +337,10 @@ struct mtype {
 
         /** If unset (-1) then values are calculated automatically from other properties */
         int armor_bash = -1;     /** innate armor vs. bash */
-        int armor_cut  = -1;     /** innate armor vs. cut */
+        int armor_cut = -1;     /** innate armor vs. cut */
+        int armor_dark = -1;     /** innate armor vs. dark */
+        int armor_light = -1;    /** innate armor vs. light */
+        int armor_psi = -1;      /** innate armor vs. psi */
         int armor_stab = -1;     /** innate armor vs. stabbing */
         int armor_bullet = -1;   /** innate armor vs. bullet */
         int armor_acid = -1;     /** innate armor vs. acid */
@@ -401,8 +426,19 @@ struct mtype {
         /** Emission sources that cycle each turn the monster remains alive */
         std::map<emit_id, time_duration> emit_fields;
 
-        pathfinding_settings path_settings;
-        pathfinding_settings path_settings_buffed;
+        pathfinding_settings legacy_path_settings;
+        pathfinding_settings legacy_path_settings_buffed;
+
+        PathfindingSettings path_settings;
+        RouteSettings route_settings;
+        PathfindingSettings path_settings_buffed;
+        RouteSettings route_settings_buffed;
+
+        // We rely on external options to construct pathfinding options
+        //   which are subject to change by rebalancing mods
+        //   thus necessiating a late load
+        std::unordered_map<std::string, std::variant<float, bool, int>> recorded_path_settings;
+        void setup_pathfinding_deferred();
 
         // Used to fetch the properly pluralized monster type name
         std::string nname( unsigned int quantity = 1 ) const;
@@ -433,8 +469,9 @@ struct mtype {
 
         // Historically located in monstergenerator.cpp
         void load( const JsonObject &jo, const std::string &src );
+        LUA_TYPE_OPS( mtype, id );
 };
 
 mon_effect_data load_mon_effect_data( const JsonObject &e );
 
-#endif // CATA_SRC_MTYPE_H
+

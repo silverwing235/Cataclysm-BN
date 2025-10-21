@@ -5,7 +5,6 @@
 #include "character.h"
 #include "cursesdef.h"
 #include "enums.h"
-#include "explosion.h"
 #include "game_constants.h"
 #include "game.h"
 #include "line.h"
@@ -14,7 +13,6 @@
 #include "mtype.h"
 #include "options.h"
 #include "output.h"
-#include "player.h"
 #include "point.h"
 #include "popup.h"
 #include "posix_time.h"
@@ -113,14 +111,14 @@ bool is_radius_visible( const tripoint &center, int radius )
 
 bool is_layer_visible( const std::map<tripoint, explosion_tile> &layer )
 {
-    return std::any_of( layer.begin(), layer.end(),
+    return std::ranges::any_of( layer,
     []( const std::pair<tripoint, explosion_tile> &element ) {
         return is_point_visible( element.first );
     } );
 }
 
 // Convert p to screen position relative to u's current position and view
-tripoint relative_view_pos( const player &u, const tripoint &p ) noexcept
+tripoint relative_view_pos( const avatar &u, const tripoint &p ) noexcept
 {
     return p - ( u.pos() + u.view_offset ) + point( POSX, POSY );
 }
@@ -192,8 +190,8 @@ void draw_custom_explosion_curses( game &g,
 {
     // calculate screen offset relative to player + view offset position
     const tripoint center = g.u.pos() + g.u.view_offset;
-    const tripoint topleft( center.x - getmaxx( g.w_terrain ) / 2,
-                            center.y - getmaxy( g.w_terrain ) / 2, 0 );
+    const tripoint topleft( center.x - ( getmaxx( g.w_terrain ) / 2 ),
+                            center.y - ( getmaxy( g.w_terrain ) / 2 ), 0 );
 
     explosion_animation anim;
 
@@ -587,7 +585,7 @@ namespace
 {
 // short visual animation (player, monster, ...) (hit, dodge, ...)
 // cTile is a UTF-8 strings, and must be a single cell wide!
-void hit_animation( const player &u, const tripoint &center, nc_color cColor,
+void hit_animation( const avatar &u, const tripoint &center, nc_color cColor,
                     const std::string &cTile )
 {
     const tripoint init_pos = relative_view_pos( u, center );
@@ -610,7 +608,7 @@ void hit_animation( const player &u, const tripoint &center, nc_color cColor,
     }
 }
 
-void draw_hit_mon_curses( const tripoint &center, const monster &m, const player &u,
+void draw_hit_mon_curses( const tripoint &center, const monster &m, const avatar &u,
                           const bool dead )
 {
     hit_animation( u, center, red_background( m.type->color ), dead ? "%" : m.symbol() );
@@ -647,11 +645,11 @@ void game::draw_hit_mon( const tripoint &p, const monster &m, const bool dead )
 
 namespace
 {
-void draw_hit_player_curses( const game &g, const Character &p, const int dam )
+void draw_hit_player_curses( const game &g, const Character &who, const int dam )
 {
-    nc_color const col = !dam ? yellow_background( p.symbol_color() ) : red_background(
-                             p.symbol_color() );
-    hit_animation( g.u, p.pos(), col, p.symbol() );
+    nc_color const col = !dam ? yellow_background( who.symbol_color() ) : red_background(
+                             who.symbol_color() );
+    hit_animation( g.u, who.pos(), col, who.symbol() );
 }
 } //namespace
 
@@ -684,9 +682,9 @@ void game::draw_hit_player( const Character &p, const int dam )
     bullet_animation().progress();
 }
 #else
-void game::draw_hit_player( const Character &p, const int dam )
+void game::draw_hit_player( const Character &who, const int dam )
 {
-    draw_hit_player_curses( *this, p, dam );
+    draw_hit_player_curses( *this, who, dam );
 }
 #endif
 
@@ -708,8 +706,8 @@ void draw_line_curses( game &g, const tripoint &center, const std::vector<tripoi
             const char sym = '?';
             const nc_color col = c_dark_gray;
             const catacurses::window &w = g.w_terrain;
-            const int k = p.x + getmaxx( w ) / 2 - center.x;
-            const int j = p.y + getmaxy( w ) / 2 - center.y;
+            const int k = p.x + ( getmaxx( w ) / 2 ) - center.x;
+            const int j = p.y + ( getmaxy( w ) / 2 ) - center.y;
             mvwputch( w, point( k, j ), col, sym );
         } else {
             // This function reveals tile at p and writes it to the player's memory
@@ -1108,8 +1106,8 @@ static void draw_cone_aoe_curses( const tripoint &, const bucketed_points &waves
     // Calculate screen offset relative to player + view offset position
     const avatar &u = get_avatar();
     const tripoint center = u.pos() + u.view_offset;
-    const tripoint topleft( center.x - catacurses::getmaxx( g->w_terrain ) / 2,
-                            center.y - catacurses::getmaxy( g->w_terrain ) / 2, 0 );
+    const tripoint topleft( center.x - ( catacurses::getmaxx( g->w_terrain ) / 2 ),
+                            center.y - ( catacurses::getmaxy( g->w_terrain ) / 2 ), 0 );
 
     auto it = waves.begin();
     shared_ptr_fast<game::draw_callback_t> wave_cb =
@@ -1188,7 +1186,7 @@ void draw_cone_aoe( const tripoint &origin, const std::map<tripoint, double> &ao
             pv.val *= 1.0 - ( 2.0 / max_bucket_count );
         }
         combined_layer.insert( combined_layer.end(), layer.begin(), layer.end() );
-        if( std::any_of( combined_layer.begin(), combined_layer.end(),
+        if( std::ranges::any_of( combined_layer,
         []( const point_with_value & element ) {
         return is_point_visible( element.pt );
         } ) ) {

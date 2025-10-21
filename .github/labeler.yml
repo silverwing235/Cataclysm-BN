@@ -14,7 +14,10 @@ translation:
   - lang/**/*
 
 docs:
-  - doc/**/*
+  - docs/**/*
 
 scripts:
   - scripts/**/*
+
+lua:
+  - "**/*.lua"

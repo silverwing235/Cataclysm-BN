@@ -115,7 +115,7 @@
       "practice": 0,
       "done_message": "You unfold the cot and place it on the ground."
     },
-    "flags": [ "ALLOWS_REMOTE_USE" ]
+    "flags": [ "ALLOWS_REMOTE_USE", "DESTROY_ON_DECHARGE" ]
   },
   {
     "id": "folding_bicycle",
@@ -138,12 +138,12 @@
       "unfold_msg": "You painstakingly unfold the bicycle and make it ready to ride.",
       "moves": 500
     },
-    "flags": [ "ALLOWS_REMOTE_USE" ]
+    "flags": [ "ALLOWS_REMOTE_USE", "DESTROY_ON_DECHARGE" ]
   },
   {
     "id": "folding_skateboard",
     "type": "TOOL",
-    "category": "tools",
+    "category": "deployables",
     "name": { "str": "skateboard" },
     "description": "This is a skateboard.",
     "weight": "2898 g",
@@ -161,12 +161,54 @@
       "unfold_msg": "You lay the skateboard down on the ground.",
       "moves": 0
     },
-    "flags": [ "ALLOWS_REMOTE_USE" ]
+    "flags": [ "ALLOWS_REMOTE_USE", "DESTROY_ON_DECHARGE" ]
+  },
+  {
+    "id": "folding_wagon",
+    "type": "TOOL",
+    "category": "deployables",
+    "name": { "str": "folding wagon" },
+    "description": "This is a folding wagon.",
+    "weight": "5kg",
+    "looks_like": "folding_basket",
+    "volume": "10L",
+    "price": "35 USD",
+    "price_postapoc": "5 USD",
+    "to_hit": -5,
+    "bashing": 10,
+    "material": "aluminum",
+    "symbol": "0",
+    "color": "light_gray",
+    "use_action": {
+      "type": "unfold_vehicle",
+      "vehicle_name": "folding_wagon",
+      "unfold_msg": "You unfold the folding wagon.",
+      "moves": 100
+    },
+    "flags": [ "ALLOWS_REMOTE_USE", "DESTROY_ON_DECHARGE" ]
+  },
+  {
+    "id": "sea_scooter",
+    "type": "TOOL",
+    "category": "tools",
+    "name": { "str": "sea scooter" },
+    "description": "A super fast Rivtech sea scooter. Includes a headlight for night expeditions. Can be recharged in the sun.",
+    "weight": "13000 g",
+    "volume": "30000 ml",
+    "price": "2000 USD",
+    "price_postapoc": "200 USD",
+    "to_hit": -5,
+    "bashing": 10,
+    "material": "aluminum",
+    "symbol": "0",
+    "color": "light_gray",
+    "use_action": { "type": "unfold_vehicle", "vehicle_name": "sea_scooter", "unfold_msg": "You place the sea scooter down.", "moves": 0 },
+    "flags": [ "ALLOWS_REMOTE_USE", "DESTROY_ON_DECHARGE" ]
   },
   {
     "id": "generic_folded_vehicle",
     "type": "TOOL",
-    "category": "tools",
+    "category": "deployables",
     "name": { "str_sp": "seeing this is a bug" },
     "description": "seeing this is a bug",
     "volume": "0 ml",
@@ -175,12 +217,12 @@
     "symbol": "/",
     "color": "light_gray",
     "use_action": "UNFOLD_GENERIC",
-    "flags": [ "ALLOWS_REMOTE_USE" ]
+    "flags": [ "ALLOWS_REMOTE_USE", "DESTROY_ON_DECHARGE" ]
   },
   {
     "id": "metal_butcher_rack",
     "type": "GENERIC",
-    "category": "tools",
+    "category": "deployables",
     "name": { "str": "metal butchering rack" },
     "description": "Metal butchering rack designed to hang a carcass in the air.  It is folded for easy transportation.",
     "weight": "5000 g",
@@ -217,7 +259,7 @@
       "unfold_msg": "You painstakingly unfold, inflate, and launch the %s.",
       "moves": 15000
     },
-    "flags": [ "ALLOWS_REMOTE_USE" ]
+    "flags": [ "ALLOWS_REMOTE_USE", "DESTROY_ON_DECHARGE" ]
   },
   {
     "id": "metal_smoking_rack",
@@ -310,6 +352,26 @@
     "flags": [ "ALLOWS_REMOTE_USE" ],
     "use_action": { "type": "deploy_furn", "furn_type": "f_butter_churn" },
     "qualities": [ [ "CONTAIN", 1 ], [ "CHURN", 1 ] ]
+  },
+  {
+    "id": "atomic_butterchurn",
+    "type": "GENERIC",
+    "category": "tools",
+    "name": { "str": "folded atomic butter churn" },
+    "description": "The Rivtech Churninator 4000, the only churn to be banned by 13 religious sects.  The legs are currently folded up for travel.  This churn requires nothing but raw milk, salt and a healthy respect for glowing objects, even able to clarify butter with its awe-inspiring nuclear might.",
+    "weight": "6464 g",
+    "volume": "11356 ml",
+    "price": "50 USD",
+    "price_postapoc": "450 USD",
+    "looks_like": "still",
+    "symbol": "u",
+    "color": "light_green",
+    "use_action": { "type": "deploy_furn", "furn_type": "f_atomic_butter_churn" },
+    "to_hit": -2,
+    "bashing": 5,
+    "material": [ "plastic", "steel" ],
+    "//": "I figured bionic preppers would have a sci-fi solution to some low tech problems.",
+    "flags": [ "LEAK_DAM", "RADIOACTIVE", "DURABLE_MELEE", "ALLOWS_REMOTE_USE" ]
   },
   {
     "id": "water_mill",

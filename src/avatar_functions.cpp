@@ -37,7 +37,6 @@ static const trait_id trait_WEB_WEAVER( "WEB_WEAVER" );
 
 static const bionic_id bio_soporific( "bio_soporific" );
 
-static const itype_id itype_brass_catcher( "brass_catcher" );
 static const itype_id itype_large_repairkit( "large_repairkit" );
 static const itype_id itype_plut_cell( "plut_cell" );
 static const itype_id itype_small_repairkit( "small_repairkit" );
@@ -477,7 +476,7 @@ bool gunmod_remove( avatar &you, item &gun, item &mod )
     gun.gun_set_mode( gun_mode_id( "DEFAULT" ) );
     //TODO: add activity for removing gunmods
 
-    if( mod.typeId() == itype_brass_catcher ) {
+    if( mod.has_flag( flag_BRASS_CATCHER ) ) {
         gun.casings_handle( [&]( detached_ptr<item> &&e ) {
             you.i_add_or_drop( std::move( e ) );
             return detached_ptr<item>();
@@ -501,8 +500,7 @@ bool gunmod_remove( avatar &you, item &gun, item &mod )
                 if( the_mod->type->gunmod->location == slot.first && free_slots < 0 ) {
                     gunmod_remove( you, gun, *the_mod );
                     free_slots++;
-                } else if( mod_locations.find( the_mod->type->gunmod->location ) ==
-                           mod_locations.end() ) {
+                } else if( !mod_locations.contains( the_mod->type->gunmod->location ) ) {
                     gunmod_remove( you, gun, *the_mod );
                 }
             }
@@ -567,7 +565,7 @@ void toolmod_add( avatar &you, item &tool, item &mod )
     }
 
     you.assign_activity( activity_id( "ACT_TOOLMOD_ADD" ), 1, -1 );
-    you.activity->targets.emplace_back( &tool );
+    you.activity->tools.emplace_back( &tool );
     you.activity->targets.emplace_back( &mod );
 }
 
@@ -802,9 +800,6 @@ bool unload_item( avatar &you, item &loc )
 
         // Construct a new ammo item and try to drop it
         detached_ptr<item> ammo = item::spawn( target->ammo_current(), calendar::turn, qty );
-        if( target->is_filthy() ) {
-            ammo->set_flag( flag_FILTHY );
-        }
 
         item &ammo_ref = *ammo;
 

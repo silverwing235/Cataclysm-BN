@@ -55,6 +55,12 @@
     "info": "With a seat or saddle, you drive from here.  You can 'e'xamine the tile to access the controls, or use the vehicle control key (default '^')."
   },
   {
+    "id": "CONTROL_WITHOUT_HANDS",
+    "type": "json_flag",
+    "context": [ "vehicle_part" ],
+    "info": "Allows you to fire two-handed weapons while driving."
+  },
+  {
     "id": "COVERED",
     "type": "json_flag",
     "context": [ "vehicle_part" ],
@@ -180,6 +186,12 @@
     "type": "json_flag",
     "context": [ "vehicle_part" ],
     "info": "This item <good>can be used as a flat surface</good> for <info>butchering</info>."
+  },
+  {
+    "id": "BUTCHER_EQ",
+    "type": "json_flag",
+    "context": [ "vehicle_part" ],
+    "info": "This item <good>can be used as a butchering rack</good>."
   },
   {
     "id": "WORKBENCH",

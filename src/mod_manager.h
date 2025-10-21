@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_MOD_MANAGER_H
-#define CATA_SRC_MOD_MANAGER_H
 
 #include <cstddef>
 #include <map>
@@ -58,6 +56,13 @@ struct MOD_INFORMATION {
 
         /** Full path to modinfo.json, for debug purposes */
         std::string path_full;
+
+        /**
+         *  The license the mod is under, preferably named such that people may find it
+         *  Ex: CC-BY-SA 4.0, GPL v3 only, MIT, CC0, BSD 3-clause, Hippocratic License 3.0
+         *  Non-FOSS should use "All Rights Reserved" or "Source Available"
+         */
+        std::string license;
 
         /** All authors who have added content to the mod (excluding maintenance changes) */
         std::set<std::string> authors;
@@ -222,4 +227,4 @@ class mod_ui
         bool can_shift_down( size_t selection, const std::vector<mod_id> &active_list );
 };
 
-#endif // CATA_SRC_MOD_MANAGER_H
+

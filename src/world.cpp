@@ -1,11 +1,11 @@
 #include "world.h"
 
+#include <algorithm>
 #include <sstream>
 #include <cstring>
 #include <chrono>
-#include <sqlite3.h>
-#include <zlib.h>
 
+#include "catacharset.h"
 #include "game.h"
 #include "avatar.h"
 #include "debug.h"
@@ -16,6 +16,8 @@
 #include "mod_manager.h"
 #include "path_info.h"
 #include "compress.h"
+#include "sqlite3.h"
+#include "zlib.h"
 
 #define dbg(x) DebugLogFL((x),DC::Main)
 static sqlite3 *open_db( const std::string &path )
@@ -85,7 +87,7 @@ WORLDINFO::WORLDINFO()
 {
     world_name = world_generator->get_next_valid_worldname();
     WORLD_OPTIONS = get_options().get_world_defaults();
-    world_save_format = save_format::V1;
+    world_save_format = save_format::V2_COMPRESSED_SQLITE3;
 
     world_saves.clear();
     active_mod_order = world_generator->get_mod_manager().get_default_mods();
@@ -99,19 +101,9 @@ void WORLDINFO::COPY_WORLD( const WORLDINFO *world_to_copy )
     active_mod_order = world_to_copy->active_mod_order;
 }
 
-bool WORLDINFO::needs_lua() const
-{
-    for( const mod_id &mod : active_mod_order ) {
-        if( mod.is_valid() && mod->lua_api_version ) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool WORLDINFO::save_exists( const save_t &name ) const
 {
-    return std::find( world_saves.begin(), world_saves.end(), name ) != world_saves.end();
+    return std::ranges::find( world_saves, name ) != world_saves.end();
 }
 
 void WORLDINFO::add_save( const save_t &name )
@@ -649,7 +641,11 @@ sqlite3 *world::get_player_db()
     }
 
     if( last_save_id != g->u.get_save_id() ) {
-        throw std::runtime_error( "Save ID changed without reloading the world object" );
+        copy_file(
+            info->folder_path() + "/" + base64_encode( last_save_id ) + ".sqlite3",
+            info->folder_path() + "/" + base64_encode( g->u.get_save_id() ) + ".sqlite3"
+        );
+        save_db = open_db( info->folder_path() + "/" + get_player_path() + ".sqlite3" );
     }
 
     return save_db;

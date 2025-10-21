@@ -55,6 +55,7 @@ static const zone_type_id zone_LOOT_PDRINK( "LOOT_PDRINK" );
 static const zone_type_id zone_LOOT_PFOOD( "LOOT_PFOOD" );
 static const zone_type_id zone_LOOT_SEEDS( "LOOT_SEEDS" );
 static const zone_type_id zone_LOOT_UNSORTED( "LOOT_UNSORTED" );
+static const zone_type_id zone_LOOT_DUMP( "LOOT_DUMP" );
 static const zone_type_id zone_LOOT_WOOD( "LOOT_WOOD" );
 static const zone_type_id zone_NO_AUTO_PICKUP( "NO_AUTO_PICKUP" );
 static const zone_type_id zone_NO_NPC_PICKUP( "NO_NPC_PICKUP" );
@@ -200,7 +201,7 @@ construction_id blueprint_options::get_final_construction(
     }
 
     for( const construction_id &c_id : list_constructions ) {
-        if( c_id == id || skip_index.find( c_id ) != skip_index.end() ) {
+        if( c_id == id || skip_index.contains( c_id ) ) {
             continue;
         }
         const construction &c = *c_id;
@@ -673,7 +674,7 @@ bool zone_manager::has( const zone_type_id &type, const tripoint &where,
 {
     const auto &point_set = get_point_set( type, fac );
     const auto &vzone_set = get_vzone_set( type, fac );
-    return point_set.find( where ) != point_set.end() || vzone_set.find( where ) != vzone_set.end();
+    return point_set.contains( where ) || vzone_set.contains( where );
 }
 
 bool zone_manager::has_near( const zone_type_id &type, const tripoint &where, int range,
@@ -848,7 +849,7 @@ zone_type_id zone_manager::get_near_zone_type_for_item( const item &it,
         return *zone_check_first;
     }
 
-    if( cat.zone() ) {
+    if( cat.zone() && has_near( *cat.zone(), where, range ) ) {
         return *cat.zone();
     }
 
@@ -869,9 +870,15 @@ zone_type_id zone_manager::get_near_zone_type_for_item( const item &it,
                 return zone_LOOT_PFOOD;
             }
         }
-
-        return zone_LOOT_FOOD;
+        if( has_near( zone_LOOT_FOOD, where, range ) ) {
+            return zone_LOOT_FOOD;
+        }
     }
+
+    if( has_near( zone_LOOT_DUMP, where, range ) ) {
+        return zone_LOOT_DUMP;
+    }
+
 
     return zone_type_id();
 }

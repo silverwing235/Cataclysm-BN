@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_OVERMAP_CONNECTION_H
-#define CATA_SRC_OVERMAP_CONNECTION_H
 
 #include <list>
 #include <vector>
@@ -40,6 +38,8 @@ class overmap_connection
 
                 int basic_cost = 0;
 
+                int weight = 1;
+
                 bool allows_terrain( const oter_id &oter ) const;
                 bool allows_turns() const {
                     return terrain->is_linear();
@@ -59,6 +59,7 @@ class overmap_connection
 
     public:
         const subtype *pick_subtype_for( const oter_id &ground ) const;
+        void clear_subtype_cache() const;
         bool can_start_at( const oter_id &ground ) const;
         bool has( const oter_id &oter ) const;
 
@@ -86,7 +87,7 @@ class overmap_connection
         };
 
         overmap_connection_layout layout;
-        std::list<subtype> subtypes;
+        std::vector<subtype> subtypes;
         mutable std::vector<cache> cached_subtypes;
 };
 
@@ -103,4 +104,4 @@ overmap_connection_id guess_for( const oter_id &oter );
 
 } // namespace overmap_connections
 
-#endif // CATA_SRC_OVERMAP_CONNECTION_H
+

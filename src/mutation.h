@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_MUTATION_H
-#define CATA_SRC_MUTATION_H
 
 #include <map>
 #include <memory>
@@ -96,10 +94,17 @@ struct mutation_branch {
         bool starts_active = false;
         // Allow soft (fabric) gear on restricted body parts
         bool allow_soft_gear  = false;
-        // IF any of the three are true, it drains that as the "cost"
+        // If true, not even oversized gear is allowed unless it's accepted by allowed_items.
+        bool allowed_items_only  = false;
+        // IF any of the 8 are true, it drains that as the "cost"
         bool fatigue       = false;
         bool hunger        = false;
         bool thirst        = false;
+        bool stamina        = false;
+        bool mana        = false;
+        bool bionic        = false;
+        bool pain        = false;
+        bool health        = false;
         // How many points it costs in character creation
         int points     = 0;
         int visibility = 0;
@@ -149,6 +154,9 @@ struct mutation_branch {
         float noise_modifier = 1.0f;
         float scent_modifier = 1.0f;
         float bleed_resist = 0;
+        float packmule_modifier = 1.0f;
+        float crafting_speed_modifier = 1.0f;
+        float construction_speed_modifier = 1.0f;
         std::optional<int> scent_intensity;
         std::optional<int> scent_mask;
 
@@ -276,6 +284,8 @@ struct mutation_branch {
         std::map<body_part, int> encumbrance_covered;
         // Body parts that now need OVERSIZE gear
         std::set<body_part> restricts_gear;
+        // item flags that allow wearing gear even if its body part is restricted
+        std::set<flag_id> allowed_items;
         // Mutation stat mods
         /** Key pair is <active: bool, mod type: "STR"> */
         std::unordered_map<std::pair<bool, std::string>, int, cata::tuple_hash> mods;
@@ -528,4 +538,4 @@ mutagen_attempt mutagen_common_checks( Character &guy, const item &it, bool stro
 
 void test_crossing_threshold( Character &guy, const mutation_category_trait &m_category );
 
-#endif // CATA_SRC_MUTATION_H
+

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_CHARACTER_FUNCTIONS_H
-#define CATA_SRC_CHARACTER_FUNCTIONS_H
 
 #include "type_id.h"
 
@@ -8,6 +6,7 @@
 #include <string>
 
 enum body_part : int;
+class player;
 class Character;
 class Creature;
 class item;
@@ -34,6 +33,10 @@ time_duration estimate_effect_dur( int skill_lvl, const efftype_id &effect,
  * similar via @ref game::handle_liquid. May start a character activity.
  */
 void siphon( Character &ch, vehicle &veh, const itype_id &desired_liquid );
+
+bool can_noclip( const Character &ch );
+
+bool can_fly( Character &ch );
 
 /** Checks for trait interactions that affect both get_book_fun_for and is_fun_to_read */
 bool is_book_morale_boosted( const Character &ch, const item &book );
@@ -204,11 +207,11 @@ bool list_ammo( const Character &who, item &base, std::vector<item_reload_option
  * @param include_empty_mags Allow selection of empty magazines
  * @param include_potential Include ammo that can potentially be used, but not right now
  */
-item_reload_option select_ammo( const Character &who, item &base, bool prompt = false,
+item_reload_option select_ammo( const player &who, item &base, bool prompt = false,
                                 bool include_empty_mags = true, bool include_potential = false );
 
 /** Select ammo from the provided options */
-item_reload_option select_ammo( const Character &who, item &base,
+item_reload_option select_ammo( const player &who, item &base,
                                 std::vector<item_reload_option> opts );
 
 /** Returns character's items that are ammo and have the matching ammo type. */
@@ -235,4 +238,4 @@ void show_skill_capped_notice( const Character &who, const skill_id &id );
 
 } // namespace character_funcs
 
-#endif // CATA_SRC_CHARACTER_FUNCTIONS_H
+

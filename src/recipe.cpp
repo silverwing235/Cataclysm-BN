@@ -10,9 +10,7 @@
 #include "assign.h"
 #include "cached_options.h"
 #include "calendar.h"
-#include "cata_utility.h"
 #include "character.h"
-#include "construction.h"
 #include "debug.h"
 #include "flag.h"
 #include "flat_set.h"
@@ -22,7 +20,6 @@
 #include "json.h"
 #include "mapgen_functions.h"
 #include "output.h"
-#include "player.h"
 #include "skill.h"
 #include "string_formatter.h"
 #include "string_id.h"
@@ -31,9 +28,7 @@
 #include "type_id.h"
 #include "uistate.h"
 #include "units.h"
-#include "value_ptr.h"
 
-static const std::string flag_ALLOW_FILTHY( "ALLOW_FILTHY" );
 
 static const itype_id itype_hotplate( "hotplate" );
 static const itype_id itype_dehydrator( "dehydrator" );
@@ -343,7 +338,7 @@ std::string recipe::get_consistency_error() const
         return !elem.first.is_valid();
     };
 
-    if( std::any_of( byproducts.begin(), byproducts.end(), is_invalid_bp ) ) {
+    if( std::ranges::any_of( byproducts, is_invalid_bp ) ) {
         return "defines invalid byproducts";
     }
 
@@ -360,7 +355,7 @@ std::string recipe::get_consistency_error() const
     };
 
     if( ( skill_used && !skill_used.is_valid() ) ||
-        std::any_of( required_skills.begin(), required_skills.end(), is_invalid_skill ) ) {
+        std::ranges::any_of( required_skills, is_invalid_skill ) ) {
         return "uses invalid skill";
     }
 
@@ -368,7 +363,7 @@ std::string recipe::get_consistency_error() const
         return !elem.first->book;
     };
 
-    if( std::any_of( booksets.begin(), booksets.end(), is_invalid_book ) ) {
+    if( std::ranges::any_of( booksets, is_invalid_book ) ) {
         return "defines invalid book";
     }
 
@@ -533,7 +528,7 @@ std::string recipe::batch_savings_string() const
 std::string recipe::result_name() const
 {
     std::string name = item::nname( result_ );
-    if( uistate.favorite_recipes.find( this->ident() ) != uistate.favorite_recipes.end() ) {
+    if( uistate.favorite_recipes.contains( this->ident() ) ) {
         name = "* " + name;
     }
 
@@ -551,7 +546,7 @@ bool recipe::will_be_blacklisted() const
             return req.first->is_blacklisted();
         };
 
-        return std::any_of( reqs.begin(), reqs.end(), req_is_blacklisted );
+        return std::ranges::any_of( reqs, req_is_blacklisted );
     };
 
     return any_is_blacklisted( reqs_internal ) || any_is_blacklisted( reqs_external );
@@ -585,24 +580,15 @@ std::function<bool( const item & )> recipe::get_component_filter(
         };
     }
 
-    // Filter out filthy components here instead of with is_crafting_component
-    // Make an exception for recipes with the ALLOW_FILTHY flag
-    std::function<bool( const item & )> filthy_filter = return_true<item>;
-    if( !has_flag( flag_ALLOW_FILTHY ) ) {
-        filthy_filter = []( const item & component ) {
-            return !component.is_filthy();
-        };
-    }
 
-    return [ rotten_filter, magazine_filter, filthy_filter ]( const item & component ) {
-        return is_crafting_component_allow_filthy( component ) &&
+    return [ rotten_filter, magazine_filter ]( const item & component ) {
+        return is_crafting_component( component ) &&
                rotten_filter( component ) &&
-               magazine_filter( component ) &&
-               filthy_filter( component );
+               magazine_filter( component );
     };
 }
 
-static std::string dump_requirements(
+[[maybe_unused]] static std::string dump_requirements(
     const requirement_data &reqs,
     int move_cost,
     const std::map<skill_id, int> &skills )

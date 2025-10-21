@@ -103,6 +103,7 @@ static const efftype_id effect_sleep( "sleep" );
 static const efftype_id effect_stunned( "stunned" );
 static const efftype_id effect_took_antiasthmatic( "took_antiasthmatic" );
 static const efftype_id effect_took_thorazine( "took_thorazine" );
+static const efftype_id effect_took_antinarcoleptic( "took_antinarcoleptic" );
 static const efftype_id effect_valium( "valium" );
 static const efftype_id effect_visuals( "visuals" );
 
@@ -297,12 +298,24 @@ void Character::suffer_from_addictions()
 
 void Character::suffer_while_awake( const int current_stim )
 {
-    if( !has_trait( trait_DEBUG_STORAGE ) &&
-        ( weight_carried() > 4 * weight_capacity() ) ) {
-        if( has_effect( effect_downed ) ) {
-            add_effect( effect_downed, 1_turns, bodypart_str_id::NULL_ID(), 0 );
+    if( !has_trait( trait_DEBUG_STORAGE ) ) {
+        units::mass w_carry;
+        units::mass w_cap;
+        if( is_mounted() ) {
+            auto &mount = *mounted_creature;
+            w_carry = mount.get_carried_weight() + this->get_weight();
+            w_cap = 4 * mount.weight_capacity();
         } else {
-            add_effect( effect_downed, 2_turns, bodypart_str_id::NULL_ID(), 0 );
+            w_carry = weight_carried();
+            w_cap = 4 * weight_capacity();
+        }
+
+        if( w_carry > w_cap ) {
+            if( has_effect( effect_downed ) ) {
+                add_effect( effect_downed, 1_turns, bodypart_str_id::NULL_ID(), 0 );
+            } else {
+                add_effect( effect_downed, 2_turns, bodypart_str_id::NULL_ID(), 0 );
+            }
         }
     }
     if( has_trait( trait_CHEMIMBALANCE ) ) {
@@ -313,7 +326,8 @@ void Character::suffer_while_awake( const int current_stim )
         suffer_from_schizophrenia();
     }
 
-    if( ( has_trait( trait_NARCOLEPTIC ) || has_artifact_with( AEP_SCHIZO ) ) ) {
+    if( ( has_trait( trait_NARCOLEPTIC ) || has_artifact_with( AEP_SCHIZO ) ) &&
+        !has_effect( effect_took_antinarcoleptic ) ) {
         if( one_turn_in( 8_hours ) ) {
             add_msg_player_or_npc( m_bad,
                                    _( "You're suddenly overcome with the urge to sleep and you pass out." ),
@@ -499,15 +513,10 @@ void Character::suffer_from_schizophrenia()
         shout( SNIPPET.random_from_category( "schizo_self_shout" ).value_or( translation() ).translated() );
         return;
     }
-    // Drop weapon
-    if( one_turn_in( 2_days ) && !weapon.is_null() ) {
-        const translation snip = SNIPPET.random_from_category( "schizo_weapon_drop" ).value_or(
-                                     translation() );
-        std::string str = string_format( snip, i_name_w );
-        str[0] = toupper( str[0] );
-
-        add_msg_if_player( m_bad, "%s", str );
-        drop( primary_weapon(), pos() );
+    // Focus debuff
+    if( one_turn_in( 8_hours ) ) {
+        add_msg_if_player( m_bad, _( "You find it hard to focus all of a sudden." ) );
+        focus_pool -= rng( 20, 40 );
         return;
     }
     // Talk to self
@@ -1545,7 +1554,7 @@ void Character::suffer()
         }
     }
 
-    for( bionic &bio : *my_bionics ) {
+    for( bionic &bio : get_bionic_collection() ) {
         process_bionic( bio );
     }
 
@@ -1917,7 +1926,7 @@ void Character::add_addiction( add_type type, int strength )
 
 bool Character::has_addiction( add_type type ) const
 {
-    return std::any_of( addictions.begin(), addictions.end(),
+    return std::ranges::any_of( addictions,
     [type]( const addiction & ad ) {
         return ad.type == type && ad.intensity >= MIN_ADDICTION_LEVEL;
     } );
@@ -1925,7 +1934,7 @@ bool Character::has_addiction( add_type type ) const
 
 void Character::rem_addiction( add_type type )
 {
-    auto iter = std::find_if( addictions.begin(), addictions.end(),
+    auto iter = std::ranges::find_if( addictions,
     [type]( const addiction & ad ) {
         return ad.type == type;
     } );
@@ -1938,7 +1947,7 @@ void Character::rem_addiction( add_type type )
 
 int Character::addiction_level( add_type type ) const
 {
-    auto iter = std::find_if( addictions.begin(), addictions.end(),
+    auto iter = std::ranges::find_if( addictions,
     [type]( const addiction & ad ) {
         return ad.type == type;
     } );

@@ -19,13 +19,14 @@
     "volume": "500 ml",
     "charges": 8,
     "phase": "liquid",
-    "flags": [ "EATEN_HOT" ],
+    "flags": [ "EATEN_HOT", "NO_COOKING_BUFF" ],
     "fun": 1,
     "vitamins": [ [ "veggy_allergen", 1 ] ]
   },
   {
     "id": "maple_sap",
     "type": "COMESTIBLE",
+    "category": "cooking_ingredients",
     "symbol": "~",
     "color": "light_cyan",
     "name": { "str_sp": "maple sap" },
@@ -62,6 +63,7 @@
     "comestible_type": "DRINK",
     "container": "condiment_bottle_unsealed",
     "calories": 106,
+    "flags": [ "NO_COOKING_BUFF" ],
     "spoils_in": "6 days 16 hours",
     "charges": 16,
     "fun": -7,
@@ -83,6 +85,7 @@
     "comestible_type": "DRINK",
     "container": "condiment_bottle_unsealed",
     "calories": 21,
+    "flags": [ "NO_COOKING_BUFF" ],
     "spoils_in": "15 days",
     "charges": 16,
     "fun": -6,
@@ -105,6 +108,7 @@
     "container": "condiment_bottle_unsealed",
     "fun": -8,
     "calories": 10,
+    "flags": [ "NO_COOKING_BUFF" ],
     "spoils_in": "15 days",
     "charges": 48,
     "phase": "liquid",
@@ -129,7 +133,7 @@
     "charges": 16,
     "healthy": 1,
     "fun": 3,
-    "flags": [ "NUTRIENT_OVERRIDE" ],
+    "flags": [ "NUTRIENT_OVERRIDE", "NO_COOKING_BUFF" ],
     "phase": "liquid"
   },
   {
@@ -146,25 +150,26 @@
     "volume": "250 ml",
     "comestible_type": "DRINK",
     "container": "jar_glass_sealed",
-    "primary_material": "junk",
+    "material": [ "junk", "nut" ],
     "quench": -2,
     "calories": 190,
     "charges": 8,
     "phase": "liquid",
-    "flags": [ "USE_EAT_VERB" ],
+    "flags": [ "USE_EAT_VERB", "NO_COOKING_BUFF" ],
     "vitamins": [ [ "iron", 6 ] ],
     "fun": 2
   },
   {
     "id": "peanutbutter_imitation",
     "type": "COMESTIBLE",
-    "name": "imitation peanutbutter",
+    "name": "imitation peanut butter",
     "description": "A thick, nutty brown paste.",
     "copy-from": "peanutbutter"
   },
   {
     "type": "COMESTIBLE",
     "id": "vinegar",
+    "category": "cooking_ingredients",
     "name": { "str_sp": "vinegar" },
     "weight": "15 g",
     "color": "white",
@@ -179,11 +184,13 @@
     "phase": "liquid",
     "charges": 16,
     "calories": 3,
+    "flags": [ "NO_COOKING_BUFF" ],
     "fun": -10
   },
   {
     "type": "COMESTIBLE",
     "id": "cooking_oil",
+    "category": "cooking_ingredients",
     "name": { "str_sp": "vegetable cooking oil" },
     "weight": "15 g",
     "color": "yellow",
@@ -201,12 +208,13 @@
     "charges": 16,
     "phase": "liquid",
     "fun": -25,
-    "flags": [ "NUTRIENT_OVERRIDE" ],
+    "flags": [ "NUTRIENT_OVERRIDE", "NO_COOKING_BUFF" ],
     "vitamins": [ [ "veggy_allergen", 1 ] ]
   },
   {
     "type": "COMESTIBLE",
     "id": "cooking_oil2",
+    "category": "cooking_ingredients",
     "name": { "str_sp": "animal cooking oil" },
     "//": "Can't copy-from the vegetable oil because it extends vitamins instead of overwriting them",
     "weight": "15 g",
@@ -225,7 +233,7 @@
     "charges": 16,
     "phase": "liquid",
     "fun": -25,
-    "flags": [ "NUTRIENT_OVERRIDE" ],
+    "flags": [ "NUTRIENT_OVERRIDE", "NO_COOKING_BUFF" ],
     "vitamins": [ [ "meat_allergen", 1 ] ]
   },
   {
@@ -248,7 +256,7 @@
     "phase": "liquid",
     "charges": 4,
     "fun": 2,
-    "flags": [ "USE_EAT_VERB" ],
+    "flags": [ "USE_EAT_VERB", "NO_COOKING_BUFF" ],
     "vitamins": [ [ "calcium", 18 ], [ "iron", 23 ], [ "junk_allergen", 1 ] ]
   },
   {
@@ -265,6 +273,7 @@
     "volume": "250 ml",
     "comestible_type": "FOOD",
     "container": "jar_glass",
+    "flags": [ "NO_COOKING_BUFF" ],
     "quench": -10,
     "calories": 31,
     "charges": 48,
@@ -296,6 +305,7 @@
     "phase": "liquid",
     "charges": 8,
     "calories": 80,
+    "flags": [ "NO_COOKING_BUFF" ],
     "fun": 6,
     "vitamins": [ [ "junk_allergen", 1 ] ]
   }

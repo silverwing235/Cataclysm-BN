@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_OMDATA_H
-#define CATA_SRC_OMDATA_H
 
 #include <climits>
 #include <cstddef>
@@ -120,6 +118,7 @@ enum class oter_flags : int {
     source_tailoring,
     source_vehicles,
     source_weapon,
+    is_bridge,
     num_oter_flags
 };
 
@@ -335,4 +334,4 @@ const std::vector<overmap_land_use_code> &get_all();
 
 } // namespace overmap_land_use_codes
 
-#endif // CATA_SRC_OMDATA_H
+

@@ -303,15 +303,16 @@
     "subcategory": "CSC_CHEM_CHEMICALS",
     "skill_used": "cooking",
     "difficulty": 3,
-    "time": "45 m",
+    "time": "30 m",
     "qualities": [ { "id": "CHEM", "level": 1 } ],
     "autolearn": true,
     "batch_time_factors": [ 80, 5 ],
-    "tools": [ [ [ "surface_heat", 18, "LIST" ] ] ],
+    "charges": 5,
+    "tools": [ [ [ "surface_heat", 9, "LIST" ] ] ],
     "components": [
-      [ [ "edible_tallow_lard", 2, "LIST" ], [ "cooking_oil", 16 ], [ "cooking_oil2", 16 ] ],
-      [ [ "chem_lye", 2, "LIST" ] ],
-      [ [ "water", 2 ], [ "water_clean", 2 ] ]
+      [ [ "edible_tallow_lard", 1, "LIST" ], [ "cooking_oil", 8 ], [ "cooking_oil2", 8 ] ],
+      [ [ "chem_lye", 1, "LIST" ] ],
+      [ [ "water", 1 ], [ "water_clean", 1 ] ]
     ],
     "flags": [ "ALLOW_ROTTEN" ]
   },
@@ -368,8 +369,8 @@
     "batch_time_factors": [ 50, 5 ],
     "//": "abstracted chloralkali process, followed by 'burning' resulting chlorine and hydrogen with electric arc as uv source and crucible serving as reaction furnace, then dissolving resulting hydrogen chloride gas in water",
     "book_learn": [ [ "adv_chemistry", 4 ], [ "textbook_chemistry", 4 ], [ "reference_cooking", 4 ] ],
-    "qualities": [ { "id": "CHEM", "level": 2 } ],
-    "tools": [ [ [ "electrolysis_kit", 500 ] ], [ [ "welder", 100 ] ], [ [ "crucible", -1 ], [ "crucible_clay", -1 ] ] ],
+    "qualities": [ { "id": "CHEM", "level": 2 }, { "id": "CONTAIN_HOT", "level": 1 } ],
+    "tools": [ [ [ "electrolysis_kit", 500 ] ], [ [ "welder", 100 ] ] ],
     "components": [ [ [ "salt_water", 4 ] ], [ [ "water_clean", 1 ] ] ]
   },
   {

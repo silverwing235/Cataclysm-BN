@@ -9,6 +9,8 @@
 #include <unordered_map>
 
 #include "avatar.h"
+#include "bodypart.h"
+#include "catalua_hooks.h"
 #include "character.h"
 #include "coordinate_conversions.h"
 #include "creature_tracker.h"
@@ -327,7 +329,7 @@ void monster::setpos( const tripoint &p )
         return;
     }
 
-    bool wandering = wander();
+    bool wandering = is_wandering();
     g->update_zombie_pos( *this, p );
     position = p;
     if( has_effect( effect_ridden ) && mounted_player && mounted_player->pos() != pos() ) {
@@ -361,6 +363,11 @@ void monster::poly( const mtype_id &id )
     faction = type->default_faction;
     upgrades = type->upgrades;
     reproduces = type->reproduces;
+
+    // HACK: We should know if the monster is in the bubble instead of checking it like this
+    if( g->critter_tracker->temporary_id( *this ) >= 0 ) {
+        g->critter_tracker->update_faction( *this );
+    }
 }
 
 bool monster::can_upgrade() const
@@ -910,6 +917,9 @@ std::string monster::extended_description() const
         {m_flag::MF_STUN_IMMUNE, pgettext( "Stun as immunity", "stun" )},
         {m_flag::MF_SLUDGEPROOF, pgettext( "Sludge as immunity", "sludge" )},
         {m_flag::MF_BIOPROOF, pgettext( "Biological hazards as immunity", "biohazards" )},
+        {m_flag::MF_DARKPROOF, pgettext( "Dark attacks as immunity", "dark" )},
+        {m_flag::MF_LIGHTPROOF, pgettext( "Light attacks as immunity", "light" )},
+        {m_flag::MF_PSIPROOF, pgettext( "Psionic attacks as immunity", "psi" )},
     } );
 
     describe_properties( _( "It can %s." ), {
@@ -1117,16 +1127,48 @@ bool monster::made_of( phase_id p ) const
 
 void monster::set_goal( const tripoint &p )
 {
+    const map &here = get_map();
+    if( !here.inbounds( p ) ) {
+        return;
+    }
+
+    if( p != this->goal && p != this->pos() ) {
+        this->repath_requested = true;
+    }
     goal = p;
 }
 
 void monster::shift( point sm_shift )
 {
+    const map &here = get_map();
+
     const point ms_shift = sm_to_ms_copy( sm_shift );
     position -= ms_shift;
-    goal -= ms_shift;
     if( wandf > 0 ) {
         wander_pos -= ms_shift;
+    }
+
+    // Pathfinding shifts, we bypass `set_dest` to prevent repathing
+    this->goal -= ms_shift;
+    if( !here.inbounds( this->goal ) ) {
+        // May accidentally occur during long-teleports
+        this->goal = pos();
+        this->path.clear();
+        return;
+    }
+
+    // Shift our found paths too, but also validate them
+    if( !this->path.empty() ) {
+        for( tripoint &p : this->path ) {
+            p -= ms_shift;
+
+            if( !here.inbounds( p ) ) {
+                // Path started going through OoB regions, so...
+                this->path.clear();
+                this->repath_requested = true;
+                break;
+            }
+        }
     }
 }
 
@@ -1227,7 +1269,7 @@ tripoint monster::move_target()
 
 Creature *monster::attack_target()
 {
-    if( wander() ) {
+    if( is_wandering() ) {
         return nullptr;
     }
 
@@ -1240,7 +1282,7 @@ Creature *monster::attack_target()
     return target;
 }
 
-bool monster::is_fleeing( player &u ) const
+bool monster::is_fleeing( Character &who ) const
 {
     if( effect_cache[FLEEING] ) {
         return true;
@@ -1248,8 +1290,8 @@ bool monster::is_fleeing( player &u ) const
     if( anger >= 100 || morale >= 100 ) {
         return false;
     }
-    monster_attitude att = attitude( &u );
-    return att == MATT_FLEE || ( att == MATT_FOLLOW && rl_dist( pos(), u.pos() ) <= 4 );
+    monster_attitude att = attitude( &who );
+    return att == MATT_FLEE || ( att == MATT_FOLLOW && rl_dist( pos(), who.pos() ) <= 4 );
 }
 
 Attitude monster::attitude_to( const Creature &other ) const
@@ -1674,7 +1716,13 @@ bool monster::is_immune_damage( const damage_type dt ) const
         case DT_HEAT:
             return has_flag( MF_FIREPROOF );
         case DT_COLD:
-            return false;
+            return has_flag( MF_COLDPROOF );
+        case DT_DARK:
+            return has_flag( MF_DARKPROOF );
+        case DT_LIGHT:
+            return has_flag( MF_LIGHTPROOF );
+        case DT_PSI:
+            return has_flag( MF_PSIPROOF );
         case DT_ELECTRIC:
             return type->sp_defense == &mdefense::zapback ||
                    has_flag( MF_ELECTRIC ) ||
@@ -1723,6 +1771,9 @@ resistances monster::resists() const
     res.set_resist( DT_ACID, type->armor_acid + get_worn_armor_val( DT_ACID ) );
     res.set_resist( DT_HEAT, type->armor_fire + get_worn_armor_val( DT_HEAT ) );
     res.set_resist( DT_COLD, type->armor_cold + get_worn_armor_val( DT_COLD ) );
+    res.set_resist( DT_DARK, type->armor_dark + get_worn_armor_val( DT_DARK ) );
+    res.set_resist( DT_LIGHT, type->armor_light + get_worn_armor_val( DT_LIGHT ) );
+    res.set_resist( DT_PSI, type->armor_psi + get_worn_armor_val( DT_PSI ) );
     res.set_resist( DT_ELECTRIC, type->armor_electric + get_worn_armor_val( DT_ELECTRIC ) );
     return res;
 }
@@ -1750,6 +1801,7 @@ void monster::melee_attack( Creature &target, float accuracy )
     }
 
     int hitspread = target.deal_melee_attack( this, melee::melee_hit_range( accuracy ) );
+    const bool attack_success = hitspread >= 0;
 
     if( target.is_player() ||
         ( target.is_npc() && g->u.attitude_to( target ) == Attitude::A_FRIENDLY ) ) {
@@ -1772,13 +1824,13 @@ void monster::melee_attack( Creature &target, float accuracy )
 
     dealt_damage_instance dealt_dam;
 
-    if( hitspread >= 0 ) {
+    if( attack_success ) {
         target.deal_melee_hit( this, hitspread, false, damage, dealt_dam );
     }
     const bodypart_str_id bp_hit = dealt_dam.bp_hit;
 
     const int total_dealt = dealt_dam.total_damage();
-    if( hitspread < 0 ) {
+    if( !attack_success ) {
         // Miss
         if( u_see_me && !target.in_sleep_state() ) {
             if( target.is_player() ) {
@@ -1862,6 +1914,12 @@ void monster::melee_attack( Creature &target, float accuracy )
 
     target.check_dead_state();
 
+    cata::run_hooks( "on_creature_melee_attacked", [ &, this]( auto & params ) {
+        params["char"] = this;
+        params["target"] = &target;
+        params["success"] = attack_success;
+    } );
+
     if( is_hallucination() ) {
         if( one_in( 7 ) ) {
             die( nullptr );
@@ -1910,6 +1968,18 @@ void monster::melee_attack( Creature &target, float accuracy )
 
 void monster::deal_projectile_attack( Creature *source, dealt_projectile_attack &attack )
 {
+    this->deal_projectile_attack( source, nullptr, attack, false );
+}
+
+void monster::deal_projectile_attack( Creature *source, item *source_weapon,
+                                      dealt_projectile_attack &attack )
+{
+    this->deal_projectile_attack( source, source_weapon,  attack, false );
+}
+
+void monster::deal_projectile_attack( Creature *source, item *source_weapon,
+                                      dealt_projectile_attack &attack, bool manual_retaliation )
+{
     const auto &proj = attack.proj;
     double &missed_by = attack.missed_by; // We can change this here
 
@@ -1923,16 +1993,17 @@ void monster::deal_projectile_attack( Creature *source, dealt_projectile_attack 
         return;
     }
 
-    // No head = immune to ranged crits
-    if( missed_by < accuracy_critical && has_flag( MF_NOHEAD ) ) {
-        missed_by = accuracy_critical;
-    }
+    // Handled in creature::deal_projectile_attack now, so that not having a head does not make it somehow less likely to hit the torso.
+    //// No head = immune to ranged crits
+    //if( missed_by < accuracy_critical && has_flag( MF_NOHEAD ) ) {
+    //    missed_by = accuracy_critical;
+    //}
 
-    Creature::deal_projectile_attack( source, attack );
+    Creature::deal_projectile_attack( source, source_weapon, attack );
 
     if( !is_hallucination() && attack.hit_critter == this ) {
         // Maybe TODO: Get difficulty from projectile speed/size/missed_by
-        on_hit( source, bodypart_id( "torso" ), &attack );
+        on_hit( source, bodypart_id( "torso" ), &attack, manual_retaliation );
     }
 }
 
@@ -2231,6 +2302,12 @@ int monster::get_armor_type( damage_type dt, bodypart_id bp ) const
             return worn_armor + static_cast<int>( type->armor_fire );
         case DT_COLD:
             return worn_armor + static_cast<int>( type->armor_cold );
+        case DT_DARK:
+            return worn_armor + static_cast<int>( type->armor_dark );
+        case DT_LIGHT:
+            return worn_armor + static_cast<int>( type->armor_light );
+        case DT_PSI:
+            return worn_armor + static_cast<int>( type->armor_psi );
         case DT_ELECTRIC:
             return worn_armor + static_cast<int>( type->armor_electric );
         case DT_NULL:
@@ -2736,6 +2813,10 @@ void monster::die( Creature *nkiller )
             }
         }
     }
+    cata::run_hooks( "on_mon_death", [ &, this]( auto & params ) {
+        params["mon"] = this;
+        params["killer"] = get_killer();
+    } );
 }
 
 bool monster::use_mech_power( int amt )
@@ -2822,14 +2903,6 @@ void monster::drop_items_on_death()
             return;
         }
         items = std::move( remaining );
-    }
-    if( has_flag( MF_FILTHY ) && get_option<bool>( "FILTHY_CLOTHES" ) ) {
-        for( const auto &it : items ) {
-            if( ( it->is_armor() || it->is_pet_armor() ) && !it->is_gun() ) {
-                // handle wearable guns as a special case
-                it->set_flag( STATIC( flag_id( "FILTHY" ) ) );
-            }
-        }
     }
 
     g->m.spawn_items( pos(), std::move( items ) );
@@ -3096,7 +3169,7 @@ void monster::add_msg_player_or_npc( const game_message_params &params,
     }
 }
 
-units::mass monster::get_carried_weight()
+units::mass monster::get_carried_weight() const
 {
     units::mass total_weight = 0_gram;
     if( tack_item ) {
@@ -3114,7 +3187,7 @@ units::mass monster::get_carried_weight()
     return total_weight;
 }
 
-units::volume monster::get_carried_volume()
+units::volume monster::get_carried_volume() const
 {
     units::volume total_volume = 0_ml;
     for( const item * const &it : inv ) {
@@ -3201,11 +3274,16 @@ float monster::speed_rating() const
 
 void monster::on_hit( Creature *source, bodypart_id, dealt_projectile_attack const *const proj )
 {
+    this->on_hit( source, bodypart_id( "torso" ), proj, false );
+}
+void monster::on_hit( Creature *source, bodypart_id, dealt_projectile_attack const *const proj,
+                      bool manual_retaliation )
+{
     if( is_hallucination() ) {
         return;
     }
 
-    if( rng( 0, 100 ) <= static_cast<int>( type->def_chance ) ) {
+    if( rng( 0, 100 ) <= static_cast<int>( type->def_chance ) && !manual_retaliation ) {
         type->sp_defense( *this, source, proj );
     }
 
@@ -3436,15 +3514,24 @@ void monster::on_load()
              name(), to_turns<int>( dt ), healed, healed_speed );
 }
 
-const pathfinding_settings &monster::get_pathfinding_settings() const
+const pathfinding_settings &monster::get_legacy_pathfinding_settings() const
 {
     return !effect_cache[PATHFINDING_OVERRIDE] ?
-           type->path_settings
-           : type->path_settings_buffed;
+           type->legacy_path_settings
+           : type->legacy_path_settings_buffed;
 
 }
 
-std::set<tripoint> monster::get_path_avoid() const
+std::pair<PathfindingSettings, RouteSettings> monster::get_pathfinding_pair()
+const
+{
+    return !effect_cache[PATHFINDING_OVERRIDE] ?
+           std::make_pair( type->path_settings, type->route_settings ) :
+           std::make_pair( type->path_settings_buffed, type->route_settings_buffed );
+
+}
+
+std::set<tripoint> monster::get_legacy_path_avoid() const
 {
     return std::set<tripoint>();
 }
@@ -3468,7 +3555,7 @@ void monster::add_item( detached_ptr<item> &&it )
 
 detached_ptr<item> monster::remove_item( item *it )
 {
-    auto iter = std::find( inv.begin(), inv.end(), it );
+    auto iter = std::ranges::find( inv, it );
     detached_ptr<item> ret;
     if( iter != inv.end() ) {
         inv.erase( iter, &ret );

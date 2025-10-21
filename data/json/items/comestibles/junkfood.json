@@ -18,7 +18,7 @@
     "charges": 8,
     "flags": [ "EATEN_HOT" ],
     "vitamins": [ [ "vitA", 3 ], [ "iron", 10 ], [ "wheat_allergen", 1 ], [ "junk_allergen", 1 ] ],
-    "fun": 20
+    "fun": 17
   },
   {
     "type": "COMESTIBLE",
@@ -34,7 +34,7 @@
     "name": "toast-em",
     "copy-from": "toastem",
     "description": "Dry toaster pastries, usually coated with solid frosting.  Sadly, these are not.",
-    "fun": 10
+    "fun": 13
   },
   {
     "type": "COMESTIBLE",
@@ -63,6 +63,7 @@
     "id": "toasterpastry",
     "name": { "str": "toaster pastry", "str_pl": "toaster pastries" },
     "copy-from": "toasterpastryfrozen",
+    "flags": [ "NO_COOKING_BUFF" ],
     "quench": 4,
     "description": "A delicious fruit-filled pastry that you've cooked.  It even comes with frosting!",
     "fun": 20
@@ -87,6 +88,7 @@
   {
     "type": "COMESTIBLE",
     "id": "kernels",
+    "category": "cooking_ingredients",
     "name": { "str_sp": "popcorn kernels" },
     "weight": "32 g",
     "color": "brown",
@@ -121,7 +123,7 @@
     "material": [ "veggy" ],
     "volume": "1 L",
     "charges": 4,
-    "flags": [ "EATEN_HOT" ],
+    "flags": [ "EATEN_HOT", "NO_COOKING_BUFF" ],
     "fun": 4,
     "vitamins": [ [ "iron", 2 ], [ "veggy_allergen", 1 ] ]
   },
@@ -160,6 +162,7 @@
     "symbol": "%",
     "quench": -4,
     "calories": 237,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "A salty treat of a snack.",
     "price": "185 cent",
     "price_postapoc": "3 USD",
@@ -180,6 +183,7 @@
     "symbol": "%",
     "quench": -2,
     "calories": 500,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "A salty treat of a snack, covered in chocolate.",
     "price": "2 USD",
     "price_postapoc": "350 cent",
@@ -199,6 +203,7 @@
     "comestible_type": "FOOD",
     "symbol": "%",
     "calories": 450,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "Chocolate isn't very healthy, but it does make a delicious treat.",
     "price": "130 cent",
     "price_postapoc": "2 USD",
@@ -218,6 +223,7 @@
     "comestible_type": "FOOD",
     "symbol": "%",
     "calories": 168,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "A handful of squishy, fluffy, puffy, delicious marshmallows.",
     "price": "250 cent",
     "price_postapoc": "1 USD",
@@ -236,6 +242,7 @@
     "comestible_type": "FOOD",
     "symbol": "%",
     "calories": 550,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "A pair of graham crackers with some chocolate and a marshmallow between them.",
     "price": "4 USD",
     "price_postapoc": "250 cent",
@@ -304,6 +311,20 @@
     "charges": 3,
     "fun": 3,
     "vitamins": [ [ "junk_allergen", 1 ] ]
+  },
+  {
+    "type": "COMESTIBLE",
+    "id": "candy3_weed",
+    "name": { "str": "'special' chewy candy" },
+    "copy-from": "candy3",
+    "price_postapoc": "12 USD",
+    "fun": 15,
+    "use_action": {
+      "type": "consume_drug",
+      "activation_message": "You start scarfing down the candy.  They taste a little funny though…",
+      "do_weed_msg": true,
+      "effects": [ { "id": "weed_high", "duration": "12 m" }, { "id": "pkill1", "duration": "12 m" } ]
+    }
   },
   {
     "type": "COMESTIBLE",
@@ -426,6 +447,7 @@
     "symbol": "%",
     "quench": 1,
     "calories": 53,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "Boiling the sap of a maple tree has concentrated it into sweet, delicious maple syrup.",
     "price": "6 USD",
     "price_postapoc": "750 cent",
@@ -447,6 +469,7 @@
     "symbol": "%",
     "quench": 3,
     "calories": 45,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "A thick syrup produced from shredded sugar beets.  Useful in cooking as a sweetener.",
     "price": "15 USD",
     "price_postapoc": "350 cent",
@@ -508,6 +531,7 @@
     "quench": -1,
     "addiction_potential": 2,
     "calories": 200,
+    "flags": [ "NO_COOKING_BUFF" ],
     "description": "Roasted coffee beans coated with dark chocolate, natural source of concentrated caffeine.",
     "price": "3 USD",
     "price_postapoc": "3 USD",
@@ -1044,6 +1068,25 @@
     "primary_material": "cheese",
     "volume": "250 ml",
     "charges": 8,
+    "flags": [ "EATEN_HOT" ],
+    "fun": 6,
+    "vitamins": [ [ "vitA", 1 ], [ "calcium", 15 ], [ "junk_allergen", 1 ], [ "milk_allergen", 1 ] ]
+  },
+  {
+    "type": "COMESTIBLE",
+    "id": "pouch_cheese",
+    "name": "cheese spread pouch",
+    "weight": "10 g",
+    "color": "yellow",
+    "comestible_type": "FOOD",
+    "symbol": "%",
+    "calories": 89,
+    "description": "Heavily processed cheese spread.  Sterilized and packed atmospherically to last long.",
+    "price": "160 cent",
+    "price_postapoc": "3 USD",
+    "material": [ "milk", "junk" ],
+    "primary_material": "cheese",
+    "volume": "30 ml",
     "flags": [ "EATEN_HOT" ],
     "fun": 6,
     "vitamins": [ [ "vitA", 1 ], [ "calcium", 15 ], [ "junk_allergen", 1 ], [ "milk_allergen", 1 ] ]

@@ -7,14 +7,10 @@
 ]]
 --
 local sorted_by = function(t, f)
-  if not f then
-    f = function(a, b)
-      return (a.k < b.k)
-    end
-  end
+  if not f then f = function(a, b) return (a.k < b.k) end end
   local sorted = {}
   for k, v in pairs(t) do
-    sorted[#sorted + 1] = { k = k, v = v }
+    table.insert(sorted, { k = k, v = v })
   end
   table.sort(sorted, f)
   return sorted
@@ -26,7 +22,7 @@ local remove_hidden_args = function(arg_list)
     if arg == "<this_state>" then
       -- sol::this_state is only visible to C++ side
     else
-      ret[#ret + 1] = arg
+      table.insert(ret, arg)
     end
   end
   return ret
@@ -35,23 +31,17 @@ end
 local fmt_arg_list = function(arg_list)
   local ret = ""
   local arg_list = remove_hidden_args(arg_list)
-  if #arg_list == 0 then
-    return ret
-  end
+  if #arg_list == 0 then return ret end
   local is_first = true
   for _, arg in pairs(arg_list) do
-    if not is_first then
-      ret = ret .. ","
-    end
+    if not is_first then ret = ret .. "," end
     ret = ret .. " " .. arg
     is_first = false
   end
   return ret .. " "
 end
 
-local fmt_one_constructor = function(typename, ctor)
-  return typename .. ".new(" .. fmt_arg_list(ctor) .. ")"
-end
+local fmt_one_constructor = function(typename, ctor) return typename .. ".new(" .. fmt_arg_list(ctor) .. ")" end
 
 local fmt_constructors = function(typename, ctors)
   if #ctors == 0 then
@@ -68,22 +58,16 @@ end
 local fmt_one_member = function(typename, member)
   local ret = "#### " .. tostring(member.name) .. "\n"
 
-  if member.comment then
-    ret = ret .. member.comment .. "\n"
-  end
+  if member.comment then ret = ret .. member.comment .. "\n" end
 
   if member.type == "var" then
     ret = ret .. "  Variable of type `" .. member.vartype .. "`"
-    if member.hasval then
-      ret = ret .. " value: `" .. tostring(member.varval) .. "`"
-    end
+    if member.hasval then ret = ret .. " value: `" .. tostring(member.varval) .. "`" end
     ret = ret .. "\n"
   elseif member.type == "func" then
     for _, overload in pairs(member.overloads) do
       ret = ret .. "  Function `(" .. fmt_arg_list(overload.args) .. ")"
-      if overload.retval ~= "nil" then
-        ret = ret .. " -> " .. overload.retval
-      end
+      if overload.retval ~= "nil" then ret = ret .. " -> " .. overload.retval end
       ret = ret .. "`\n"
     end
   else
@@ -129,14 +113,10 @@ local fmt_enum_entries = function(typename, entries)
     local entries_filtered = {}
     for k, v in pairs(entries) do
       -- TODO: this should not be needed
-      if type(v) ~= "table" and type(v) ~= "function" then
-        entries_filtered[k] = v
-      end
+      if type(v) ~= "table" and type(v) ~= "function" then entries_filtered[k] = v end
     end
 
-    local entries_sorted = sorted_by(entries_filtered, function(a, b)
-      return a.v < b.v
-    end)
+    local entries_sorted = sorted_by(entries_filtered, function(a, b) return a.v < b.v end)
     for _, it in pairs(entries_sorted) do
       ret = ret .. "- `" .. tostring(it.k) .. "` = `" .. tostring(it.v) .. "`\n"
     end
@@ -146,23 +126,17 @@ end
 
 doc_gen_func.impl = function()
   local ret = [[---
-title: Lua API reference
-editUrl: false
-sidebar:
-  badge:
-    text: Generated
-    status: note
+edit: false
 ---
 
-:::note
+# Lua API reference
 
-This page is auto-generated from [`data/raw/generate_docs.lua`][generate_docs]
+> [!NOTE]
+>
+> This page is auto-generated from [`data/raw/generate_docs.lua`][generate_docs]
 and should not be edited directly.
 
 [generate_docs]: https://github.com/cataclysmbnteam/Cataclysm-BN/blob/main/data/raw/generate_docs.lua
-
-:::
-
 ]]
 
   local dt = catadoc
@@ -176,9 +150,7 @@ and should not be edited directly.
     local type_comment = dt_type.type_comment
     ret = ret .. "## " .. typename .. "\n"
 
-    if type_comment then
-      ret = ret .. type_comment .. "\n"
-    end
+    if type_comment then ret = ret .. type_comment .. "\n" end
 
     local bases = dt_type["#bases"]
     local ctors = dt_type["#construct"]
@@ -222,9 +194,7 @@ and should not be edited directly.
     local lib_comment = dt_lib.lib_comment
     ret = ret .. "## " .. typename .. "\n"
 
-    if lib_comment then
-      ret = ret .. lib_comment .. "\n"
-    end
+    if lib_comment then ret = ret .. lib_comment .. "\n" end
 
     local members = dt_lib["#member"]
 

@@ -1,6 +1,4 @@
 #pragma once
-#ifndef CATA_SRC_MAGIC_H
-#define CATA_SRC_MAGIC_H
 
 #include <functional>
 #include <map>
@@ -59,6 +57,12 @@ enum spell_flag {
     WONDER, // instead of casting each of the extra_spells, it picks N of them and casts them (where N is std::min( damage(), number_of_spells ))
     PAIN_NORESIST, // pain altering spells can't be resisted (like with the deadened trait)
     NO_FAIL, // this spell cannot fail when you cast it
+    BRAWL, // this spell can be used by brawlers
+    DUPE_SOUND, // this spell will play 'duplicate' sounds, if relevant to the spell effect
+    ADD_MELEE_DAM, // Add melee damage to the spell's damage. Legacy method, "melee_dam" vector is preferred instead
+    PHYSICAL, // IMPLIES BRAWL. This spell is actually a Physical Technique / Weapon Arte / similar, and is sort-of a replacement of martial arts.
+    MOD_MELEE_MOVES, // Use melee attack cost as a base and add spell cost on top
+    MOD_MELEE_STAM, // Use melee stamina cost as a base and add spell cost on top
     LAST
 };
 
@@ -156,6 +160,15 @@ class spell_type
         translation sound_description;
         skill_id skill;
 
+        // scale based on stats
+        bool scale_str;
+        bool scale_dex;
+        bool scale_per;
+        bool scale_int;
+
+        // Mutations that block the spell from being cast
+        std::set<trait_id> blocker_mutations;
+
         requirement_id spell_components;
 
         sounds::sound_t sound_type = sounds::sound_t::_LAST;
@@ -196,6 +209,13 @@ class spell_type
         float range_increment = 0.0f;
         // max range this spell can achieve
         int max_range = 0;
+
+        // minimum "accuracy" of a spell
+        int min_accuracy = 0;
+        // amount of "accuracy" change per level
+        float accuracy_increment = 0.0f;
+        // maximum "accuracy"
+        int max_accuracy = 0;
 
         // minimum area of effect of a spell (radius)
         // 0 means the spell only affects the target
@@ -241,6 +261,14 @@ class spell_type
         // max or min energy cost, based on sign of energy_increment
         int final_energy_cost = 0.0f;
 
+        // base encumbrance value for the spell to be hindered by the caster's
+        // arms. anything over this value will affect the spell.
+        int arm_encumbrance_threshold = 20;
+
+        // base encumerance value for the spell to be hindered by the caster's
+        // legs. anything over this value will affect the spell.
+        int leg_encumbrance_threshold = 20;
+
         // spell is restricted to being cast by only this class
         // if spell_class is empty, spell is unrestricted
         trait_id spell_class;
@@ -267,6 +295,9 @@ class spell_type
         energy_type energy_source = energy_type::none_energy;
 
         damage_type dmg_type = damage_type::DT_NULL;
+
+        // Melee damage types that the 'spell' uses
+        std::vector<damage_type> melee_dam;
 
         // list of valid targets to be affected by the area of effect.
         enum_bitset<valid_target> effect_targets;
@@ -318,6 +349,10 @@ class spell
         int min_leveled_aoe() const;
         // minimum duration including levels (moves)
         int min_leveled_duration() const;
+        // get the sum of the deltas of relevant stats away from 8
+        int get_stats_deltas( const Character &guy ) const;
+        // get the multiplier to spell stats from character stats
+        double get_stat_mult( bool decrease, const Character &guy ) const;
 
     public:
         spell() = default;
@@ -348,6 +383,8 @@ class spell
         bool is_max_level() const;
         // what is the max level of the spell
         int get_max_level() const;
+        // what are the blocker mutations
+        std::set<trait_id> get_blocker_muts() const;
 
         // what is the intensity of the field the spell generates ( 0 if no field )
         int field_intensity() const;
@@ -355,8 +392,14 @@ class spell
         int damage() const;
         dealt_damage_instance get_dealt_damage_instance() const;
         damage_instance get_damage_instance() const;
+        // damage with character stats taken into account
+        int damage_as_character( const Character &guy ) const;
+        dealt_damage_instance get_dealt_damage_instance( const Character &guy ) const;
+        damage_instance get_damage_instance( const Character &guy ) const;
         // how big is the spell's radius
         int aoe() const;
+        // "accuracy" of spells (used for determining body part hit)
+        int accuracy() const;
         // distance spell can be cast
         int range() const;
         // how much energy does the spell cost
@@ -418,7 +461,7 @@ class spell
         //if targeted_monster_ids is empty, it returns an empty string
         std::string list_targeted_monster_names() const;
 
-        std::string damage_string() const;
+        std::string damage_string( const Character &guy ) const;
         std::string aoe_string() const;
         std::string duration_string() const;
 
@@ -446,7 +489,7 @@ class spell
         // goes through the spell effect and all of its internal spells
         void cast_all_effects( Creature &source, const tripoint &target ) const;
         // uses up the components in @you's inventory
-        void use_components( player &you ) const;
+        void use_components( Character &who ) const;
         // checks if a target point is in spell range
         bool is_target_in_range( const Creature &caster, const tripoint &p ) const;
 
@@ -641,4 +684,4 @@ struct area_expander {
     void sort_descending();
 };
 
-#endif // CATA_SRC_MAGIC_H
+

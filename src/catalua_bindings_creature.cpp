@@ -1,4 +1,3 @@
-#ifdef LUA
 #include "catalua_bindings.h"
 
 #include "activity_type.h"
@@ -23,6 +22,7 @@
 #include "monfaction.h"
 #include "monster.h"
 #include "morale_types.h"
+#include "mtype.h"
 #include "mutation.h"
 #include "npc.h"
 #include "player.h"
@@ -250,9 +250,7 @@ void cata::detail::reg_creature( sol::state &lua )
 
         SET_FX_T( has_grab_break_tec, bool() const );
 
-        luna::set_fx( ut, "get_weight_capacity", []( UT_CLASS & cr ) -> std::int64_t {
-            return cr.weight_capacity().value();
-        } );
+        luna::set_fx( ut, "get_weight_capacity", []( UT_CLASS & cr ) -> std::int64_t { return cr.weight_capacity().value(); } );
     }
 #undef UT_CLASS // #define UT_CLASS Creature
 }
@@ -277,6 +275,8 @@ void cata::detail::reg_monster( sol::state &lua )
         SET_MEMB( unique_name );
 
         // Methods
+        // I really don't want to break the uniformity, but...
+        luna::set_fx( ut, "get_type", []( const monster & m ) { return m.type -> id; } );
         SET_FX_T( can_upgrade, bool() const );
         SET_FX_T( hasten_upgrade, void() );
         SET_FX_T( get_upgrade_time, int() const );
@@ -300,7 +300,7 @@ void cata::detail::reg_monster( sol::state &lua )
         SET_FX_T( swims, bool() const );
 
         SET_FX_T( move_target, tripoint() );
-        SET_FX_N_T( wander, "is_wandering", bool() );
+        SET_FX_N_T( is_wandering, "is_wandering", bool() );
 
         SET_FX_T( wander_to, void( const tripoint & p, int f ) );
         SET_FX_T( move_to, bool( const tripoint & p, bool force, bool step_on_critter,
@@ -346,6 +346,9 @@ void cata::detail::reg_character( sol::state &lua )
 
         SET_FX_T( setID, void( character_id, bool ) );
 
+        SET_FX_T( reset, void() );
+        SET_FX_T( reset_encumbrance, void() );
+
         SET_FX_T( get_str, int() const );
         SET_FX_T( get_dex, int() const );
         SET_FX_T( get_per, int() const );
@@ -369,15 +372,17 @@ void cata::detail::reg_character( sol::state &lua )
         SET_FX_T( mod_dex_bonus, void( int ) );
         SET_FX_T( mod_per_bonus, void( int ) );
         SET_FX_T( mod_int_bonus, void( int ) );
+        SET_FX_T( mod_speed_bonus, void( int ) );
+        SET_FX_T( set_speed_bonus, void( int ) );
 
-        SET_FX_T( get_healthy, int() const );
-        SET_FX_T( get_healthy_mod, int() const );
+        SET_FX_T( get_healthy, float() const );
+        SET_FX_T( get_healthy_mod, float() const );
 
-        SET_FX_T( mod_healthy, void( int ) );
-        SET_FX_T( mod_healthy_mod, void( int, int ) );
+        SET_FX_T( mod_healthy, void( float ) );
+        SET_FX_T( mod_healthy_mod, void( float, float ) );
 
-        SET_FX_T( set_healthy, void( int ) );
-        SET_FX_T( set_healthy_mod, void( int ) );
+        SET_FX_T( set_healthy, void( float ) );
+        SET_FX_T( set_healthy_mod, void( float ) );
 
         SET_FX_T( get_stored_kcal, int() const );
 
@@ -401,10 +406,7 @@ void cata::detail::reg_character( sol::state &lua )
             faction *fac = charac.get_faction();
             return fac == nullptr ? faction_id::NULL_ID() : fac->id;
         } );
-        luna::set_fx( ut, "set_faction_id", []( UT_CLASS & charac, faction_id id )
-        {
-            charac.set_fac_id( id.str() );
-        } );
+        luna::set_fx( ut, "set_faction_id", []( UT_CLASS & charac, faction_id id ) { charac.set_fac_id( id.str() ); } );
 
         SET_FX_T( sight_impaired, bool() const );
 
@@ -449,6 +451,10 @@ void cata::detail::reg_character( sol::state &lua )
         SET_FX_T( is_quiet, bool() const );
 
         SET_FX_T( is_stealthy, bool() const );
+
+        SET_FX( uncanny_dodge );
+
+        SET_FX( get_melee_stamina_cost );
 
         SET_FX_T( cough, void( bool harmful, int loudness ) );
 
@@ -619,8 +625,13 @@ void cata::detail::reg_character( sol::state &lua )
 
         SET_FX_T( worn_with_flag, bool( const flag_id &, const bodypart_id & ) const );
 
+        SET_FX_T( worn_with_id, bool( const itype_id &, const bodypart_id & ) const );
+
         SET_FX_T( item_worn_with_flag,
                   const item * ( const flag_id &, const bodypart_id & ) const );
+
+        SET_FX_T( item_worn_with_id,
+                  const item * ( const itype_id &, const bodypart_id & ) const );
 
         SET_FX_T( get_skill_level, int( const skill_id & ) const );
 
@@ -667,9 +678,27 @@ void cata::detail::reg_character( sol::state &lua )
 
         SET_FX_T( is_hauling, bool() const );
 
+        DOC( "Adds an item with the given id and amount" );
+        SET_FX_T( add_item_with_id, void( const itype_id & itype, int count ) );
+
+        DOC( "Checks for an item with the given id" );
+        SET_FX_T( has_item_with_id, bool( const itype_id & itype, bool need_charges ) const );
+
+        DOC( "Gets the first occurrence of an item with the given id" );
+        SET_FX_T( get_item_with_id, const item * ( const itype_id & itype, bool need_charges ) const );
+
+        DOC( "Checks for an item with the given flag" );
         SET_FX_T( has_item_with_flag, bool( const flag_id & flag, bool need_charges ) const );
+
+        DOC( "Gets all items with the given flag" );
         SET_FX_T( all_items_with_flag,
-                  std::vector<item *>( const flag_id & flag ) const );
+                  std::vector<item *>( const flag_id & flag, bool need_charges ) const );
+
+        DOC( "Gets all items" );
+        SET_FX_T( all_items, std::vector<item *>( bool need_charges ) const );
+
+        DOC( "Removes given `Item` from character's inventory. The `Item` must be in the inventory, neither wielded nor worn." );
+        luna::set_fx( ut, "inv_remove_item", []( Character & ch, item * it ) -> void { ch.inv_remove_item( it ); } );
 
         SET_FX_T( assign_activity,
                   void( const activity_id &, int, int, int, const std::string & ) );
@@ -756,12 +785,8 @@ void cata::detail::reg_character( sol::state &lua )
         SET_FX_T( has_morale_to_read, bool() const );
         SET_FX_T( has_morale_to_craft, bool() const );
 
-        luna::set_fx( ut, "knows_recipe", []( const UT_CLASS & utObj, const recipe_id & rec ) -> bool {
-            return utObj.knows_recipe( &( rec.obj() ) );
-        } );
-        luna::set_fx( ut, "learn_recipe", []( UT_CLASS & utObj, const recipe_id & rec ) -> void {
-            utObj.learn_recipe( &( rec.obj() ) );
-        } );
+        luna::set_fx( ut, "knows_recipe", []( const UT_CLASS & utObj, const recipe_id & rec ) -> bool { return utObj.knows_recipe( &( rec.obj() ) ); } );
+        luna::set_fx( ut, "learn_recipe", []( UT_CLASS & utObj, const recipe_id & rec ) -> void { utObj.learn_recipe( &( rec.obj() ) ); } );
 
         SET_FX_T( suffer, void() );
 
@@ -882,9 +907,9 @@ void cata::detail::reg_npc( sol::state &lua )
 
         SET_FX_T( smash_ability, int() const );
 
-        luna::set_fx( ut, "complain_about", []( UT_CLASS & npchar, const std::string & issue,
-        const time_duration & dur, const std::string & speech, sol::optional<bool> force ) -> bool {
-            return npchar.complain_about( issue, dur, speech, force ? *force : false );
+        luna::set_fx( ut, "complain_about",
+        []( UT_CLASS & npchar, const std::string & issue, const time_duration & dur, const std::string & speech, sol::optional<bool> force ) -> bool {
+            return npchar.complain_about( issue, dur, speech, force.value_or( false ) );
         } );
 
         SET_FX_T( warn_about,
@@ -947,16 +972,21 @@ void cata::detail::reg_npc( sol::state &lua )
 
 void cata::detail::reg_avatar( sol::state &lua )
 {
+#define UT_CLASS avatar
     {
         // Note(AluminumAlman): skipping binding members and methods of this class because
         // most of the methods and members are already binded through Character.
         sol::usertype<avatar> ut =
-            luna::new_usertype<avatar>(
-                lua,
-                luna::bases<player, Character, Creature>(),
-                luna::no_constructor
-            );
-    }
-}
+        luna::new_usertype<avatar>(
+            lua,
+            luna::bases<player, Character, Creature>(),
+            luna::no_constructor
+        );
 
-#endif // #ifdef LUA
+        SET_FX_T( get_active_missions, std::vector<mission *>() const );
+        SET_FX_T( get_completed_missions, std::vector<mission *>() const );
+        SET_FX_T( get_failed_missions, std::vector<mission *>() const );
+
+    }
+#undef UT_CLASS // #define UT_CLASS npc_opinion
+}

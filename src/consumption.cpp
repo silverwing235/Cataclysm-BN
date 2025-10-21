@@ -3,6 +3,7 @@
 #include "pickup.h"
 #include "player.h" // IWYU pragma: associated
 #include "consumption.h" // IWYU pragma: associated
+#include "character.h"
 
 #include <algorithm>
 #include <array>
@@ -11,7 +12,6 @@
 #include <optional>
 #include <string>
 #include <tuple>
-#include <type_id.h>
 
 #include "activity_handlers.h"
 #include "addiction.h"
@@ -45,6 +45,7 @@
 #include "stomach.h"
 #include "string_formatter.h"
 #include "translations.h"
+#include "type_id.h"
 #include "units.h"
 #include "vitamin.h"
 #include "weather.h"
@@ -244,6 +245,9 @@ static int compute_default_effective_kcal( const item &comest, const Character &
         kcal *= 0.75f;
     }
 
+    if( get_option<bool>( "cooking_kcal_buff" ) && comest.get_kcal_mult() > 1 ) {
+        kcal *= comest.get_kcal_mult();
+    }
     if( you.has_trait( trait_GIZZARD ) ) {
         kcal *= 0.6f;
     }
@@ -333,6 +337,9 @@ nutrients Character::compute_effective_nutrients( const item &comest ) const
                 tally += component_value;
             }
         }
+        if( comest.get_kcal_mult() > 1 ) {
+            tally.kcal *= comest.get_kcal_mult();
+        }
         return tally / comest.recipe_charges;
     } else {
         return compute_default_effective_nutrients( comest, *this );
@@ -399,6 +406,10 @@ std::pair<nutrients, nutrients> Character::compute_nutrient_range(
         nutrients byproduct_nutr = compute_default_effective_nutrients( byproduct_it, *this );
         tally_min -= byproduct_nutr;
         tally_max -= byproduct_nutr;
+    }
+    if( comest.get_kcal_mult() > 1 ) {
+        tally_min.kcal *= comest.get_kcal_mult();
+        tally_max.kcal *= comest.get_kcal_mult();
     }
 
     return { tally_min / charges, tally_max / charges };
@@ -816,7 +827,6 @@ bool Character::eat( item &food, bool force )
     if( !food.is_food() ) {
         return false;
     }
-
     const auto ret = force ? can_eat( food ) : will_eat( food, is_player() );
     if( !ret.success() ) {
         return false;
@@ -905,16 +915,7 @@ bool Character::eat( item &food, bool force )
 
     moves -= mealtime;
 
-    // If it's poisonous... poison us.
-    // TODO: Move this to a flag
-    if( food.poison > 0 && !has_trait( trait_POISRESIST ) &&
-        !has_trait( trait_EATDEAD ) ) {
-        if( food.poison >= rng( 2, 4 ) ) {
-            add_effect( effect_poison, food.poison * 1_minutes );
-        }
-
-        add_effect( effect_foodpoison, food.poison * 30_minutes );
-    }
+    consume_poison( *this, food );
 
     if( food.has_flag( flag_HIDDEN_HALLU ) ) {
         if( !has_effect( effect_hallu ) ) {
@@ -1242,14 +1243,13 @@ bool Character::consume_effects( item &food )
 
     // Set up food for ingestion
     const item &contained_food = food.is_container() ? food.get_contained() : food;
-    food_summary ingested{
+    food_summary ingested {
         compute_effective_nutrients( contained_food )
     };
     // Maybe move tapeworm to digestion
     if( has_effect( effect_tapeworm ) ) {
         ingested.nutr /= 2;
     }
-
     int excess_kcal = get_stored_kcal() + stomach.get_calories() + ingested.nutr.kcal -
                       max_stored_kcal();
 
@@ -1517,7 +1517,6 @@ detached_ptr<item> Character::consume_item( detached_ptr<item> &&target )
     }
 
     item &comest = get_consumable_from( *target );
-
     if( comest.is_null() || target->is_craft() ) {
         add_msg_if_player( m_info, _( "You can't eat your %s." ), target->tname() );
         if( is_npc() ) {
@@ -1560,6 +1559,7 @@ void Character::consume( item &target )
     }
 
     item &comest = get_consumable_from( target );
+    const auto old_invlet = target.invlet;
 
     if( comest.is_null() || target.is_craft() ) {
         add_msg_if_player( m_info, _( "You can't eat your %s." ), target.tname() );
@@ -1582,7 +1582,38 @@ void Character::consume( item &target )
     // Restack and sort so that we don't lie about target's invlet
     if( inv_item ) {
         inv.restack( *this->as_player() );
+
+        // in the case that the consumable was in a container, but the container is now empty (no more charges)
+        // the invlet is lost
+        // so we find try to find a new container with a consumable of the same type, and re-assign to it
+        if( was_in_container && !target.is_favorite && comest.count_by_charges() && comest.charges == 0 &&
+            !is_wearing( target ) ) {
+            auto &cont_type = target.typeId();
+            auto &item_type = comest.typeId();
+
+            auto stacks = inv.const_slice();
+            // find a non-empty container of the same type, with the same content type
+            for( auto &stack : stacks ) {
+                auto &c = stack->front();
+                if( c->typeId() != cont_type ) {
+                    continue;
+                }
+                if( !c->is_container() || c->contents.empty() ) {
+                    continue;
+                }
+                if( c->contents.front().typeId() != item_type ) {
+                    continue;
+                }
+
+                // remove the assignment from the now-empty container regardless,
+                // and assign it to the next container if found
+                inv_reassign_item( *c, old_invlet, true );
+
+                break;
+            }
+        }
     }
+
     if( consumed ) {
         if( was_in_container && wielding ) {
             add_msg_if_player( _( "You are now wielding an empty %s." ), primary_weapon().tname() );
@@ -1673,4 +1704,19 @@ consumption_event::consumption_event( const item &food ) : time( calendar::turn 
 {
     type_id = food.typeId();
     component_hash = food.make_component_hash();
+}
+
+void consume_poison( Character &consumer, item &food )
+{
+    // If it's poisonous... poison us.
+    // TODO: Move this to a flag
+    if( food.poison > 0 && !consumer.has_trait( trait_POISRESIST ) &&
+        !consumer.has_trait( trait_EATDEAD ) && !consumer.has_bionic( bio_digestion ) ) {
+        if( food.poison >= rng( 2, 4 ) ) {
+            consumer.add_effect( effect_poison, food.poison * 1_minutes );
+        }
+
+        consumer.add_effect( effect_foodpoison, food.poison * 30_minutes );
+    }
+
 }
