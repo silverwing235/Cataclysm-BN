@@ -29,15 +29,15 @@
 # 김예준 <gimy77357@gmail.com>, 2025
 # Coolthulhu <Coolthulhu@gmail.com>, 2025
 # ARDOR Flag, 2025
-# 김동현, 2025
 # Tae Heon Lim, 2025
 # Fruitybite, 2025
+# 김동현, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: cataclysm-bn\n"
-"POT-Creation-Date: 2025-10-20 01:36+0000\n"
-"Last-Translator: Fruitybite, 2025\n"
+"POT-Creation-Date: 2025-10-22 01:36+0000\n"
+"Last-Translator: 김동현, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/bn-team/teams/113585/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -50167,7 +50167,7 @@ msgstr "열려있는 소형 비닐봉지. 쓰레기나 마찬가지다."
 #: data/json/items/containers.json
 msgid "resealable plastic bag"
 msgid_plural "resealable plastic bags"
-msgstr[0] ""
+msgstr[0] "지퍼 달린 비닐봉지"
 
 #. ~ Description for {'str': 'resealable plastic bag'}
 #: data/json/items/containers.json
@@ -69865,7 +69865,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor fast draw holster"
 msgid_plural "power armor fast draw holsters"
-msgstr[0] ""
+msgstr[0] "파워 아머 빨리 뽑기 총집"
 
 #. ~ Description for {'str': 'power armor fast draw holster'}
 #: data/json/items/armor/power_armor.json
@@ -69877,7 +69877,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor shoulder holster"
 msgid_plural "power armor shoulder holsters"
-msgstr[0] ""
+msgstr[0] "파워 아머 어깨 총집"
 
 #. ~ Description for {'str': 'power armor shoulder holster'}
 #: data/json/items/armor/power_armor.json
@@ -69889,7 +69889,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor XL holster"
 msgid_plural "power armor XL holsters"
-msgstr[0] ""
+msgstr[0] "파워 아머 대형 총집"
 
 #. ~ Description for {'str': 'power armor XL holster'}
 #: data/json/items/armor/power_armor.json
@@ -69902,7 +69902,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor ring holster"
 msgid_plural "power armor ring holsters"
-msgstr[0] ""
+msgstr[0] "파워 아머 고리 총집"
 
 #. ~ Description for {'str': 'power armor ring holster'}
 #: data/json/items/armor/power_armor.json
@@ -69914,7 +69914,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor baldric"
 msgid_plural "power armor baldrics"
-msgstr[0] ""
+msgstr[0] "파워 아머 수대"
 
 #. ~ Description for {'str': 'power armor baldric'}
 #: data/json/items/armor/power_armor.json
@@ -69970,7 +69970,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor ammo satchel"
 msgid_plural "power armor ammo satchels"
-msgstr[0] ""
+msgstr[0] "파워 아머 탄약 가방"
 
 #. ~ Description for {'str': 'power armor ammo satchel'}
 #: data/json/items/armor/power_armor.json
@@ -69983,7 +69983,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor magazine satchel"
 msgid_plural "power armor magazine satchels"
-msgstr[0] ""
+msgstr[0] "파워 아머 탄창 가방"
 
 #. ~ Description for {'str': 'power armor magazine satchel'}
 #: data/json/items/armor/power_armor.json
@@ -69996,7 +69996,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor leg magazine pouch"
 msgid_plural "power armor leg magazine pouches"
-msgstr[0] ""
+msgstr[0] "파워 아머 다리 탄창 주머니"
 
 #. ~ Description for {'str': 'power armor leg magazine pouch', 'str_pl':
 #. 'power armor leg magazine pouches'}
@@ -70009,7 +70009,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor leg magazine satchel"
 msgid_plural "power armor leg magazine satchels"
-msgstr[0] ""
+msgstr[0] "파워 아머 다리 탄창 가방"
 
 #. ~ Description for {'str': 'power armor leg magazine satchel'}
 #: data/json/items/armor/power_armor.json
@@ -70022,7 +70022,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor leg ammo satchel"
 msgid_plural "power armor leg ammo satchels"
-msgstr[0] ""
+msgstr[0] "파워 아머 다리 탄약 가방"
 
 #. ~ Description for {'str': 'power armor leg ammo satchel'}
 #: data/json/items/armor/power_armor.json
@@ -70035,7 +70035,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor grenade ammo pouch"
 msgid_plural "power armor grenade ammo pouches"
-msgstr[0] ""
+msgstr[0] "파워 아머 유탄 주머니"
 
 #. ~ Description for {'str': 'power armor grenade ammo pouch', 'str_pl':
 #. 'power armor grenade ammo pouches'}
@@ -70048,7 +70048,7 @@ msgstr ""
 #: data/json/items/armor/power_armor.json
 msgid "power armor hand grenade pouch"
 msgid_plural "power armor hand grenade pouches"
-msgstr[0] ""
+msgstr[0] "파워 아머 수류탄 주머니"
 
 #. ~ Description for {'str': 'power armor hand grenade pouch', 'str_pl':
 #. 'power armor hand grenade pouches'}
@@ -70385,6 +70385,19 @@ msgid ""
 msgstr ""
 "SWAT 팀 및 기타 무장 집단이 사용하는 무거운 합성방패입니다. 권총탄이 이따금 날아오는 정도는 무난하게 막아내지만, 무거운 탓에 "
 "다루기 힘들고 다리를 제대로 보호해주지 못합니다."
+
+#: data/json/items/armor/shields.json
+msgid "large ballistic shield"
+msgid_plural "large ballistic shields"
+msgstr[0] "대형 방탄방패"
+
+#. ~ Description for {'str': 'large ballistic shield'}
+#: data/json/items/armor/shields.json
+msgid ""
+"A tall composite shield used by SWAT teams and other armed forces, rated for"
+" pistol bullets.  Covers the body and legs quite well, but is much heavier "
+"and more encumbering than lighter models."
+msgstr ""
 
 #: data/json/items/armor/shields.json
 msgid "leather-reinforced shield"
@@ -226889,11 +226902,11 @@ msgstr ""
 
 #: data/mods/rpg_system/iuse.json
 msgid "Access the [System]"
-msgstr ""
+msgstr "[시스템] 접근"
 
 #: data/mods/rpg_system/modinfo.json
 msgid "RPG System"
-msgstr ""
+msgstr "RPG 시스템"
 
 #. ~ Description for RPG System
 #: data/mods/rpg_system/modinfo.json
@@ -226901,22 +226914,28 @@ msgid ""
 "Adds an RPG [System] with [Classes], [Traits] and [Levels]. Gain experience "
 "from killing monsters, level up, choose a class, and gain powerful traits."
 msgstr ""
+"[클래스], [특성], [레벨]과 같은 RPG 시스템을 추가합니다. 괴물을 처치하여 경험치를 얻고, 레벨업하고, 클래스를 선택하여 강력한"
+" 특성을 얻을 수 있습니다."
 
 #: data/mods/rpg_system/system_interface.json
 msgid "[System Interface]"
 msgid_plural "[System Interface]s"
-msgstr[0] ""
+msgstr[0] "[시스템 인터페이스]"
 
 #. ~ Description for {'str': '[System Interface]'}
 #: data/mods/rpg_system/system_interface.json
 msgid ""
 "A mysterious interface that allows you to access the [System]. It "
 "materialized in your possession when the System initialized."
-msgstr ""
+msgstr "[시스템]에 접근할 수 있게 해주는 신비로운 인터페이스. 시스템이 시작될 때 당신의 소유물로 구체화되었습니다."
+
+#: data/mods/rpg_system/system_interface.json
+msgid "Your soul burns and aches"
+msgstr "당신의 영혼이 불타고 아픕니다."
 
 #: data/mods/rpg_system/system_interface.json
 msgid "Damaged Soul"
-msgstr ""
+msgstr "상처입은 영혼"
 
 #. ~ Description of effect 'Damaged Soul'.
 #: data/mods/rpg_system/system_interface.json
@@ -226924,57 +226943,61 @@ msgid ""
 "Your spirit has been damaged by abandoning your chosen path. You feel "
 "weakened and disconnected from your inner power."
 msgstr ""
+"당신의 영혼은 선택한 길을 버림으로써 손상되었습니다. 당신은 약해진 느낌과 내면의 힘으로부터 분리된 상태를 경험하고 있습니다."
 
 #. ~ Apply message for effect(s) 'Damaged Soul'.
 #: data/mods/rpg_system/system_interface.json
 msgid "You feel a deep pain in your soul as you abandon your path."
-msgstr ""
+msgstr "당신이 길을 버릴 때 영혼 깊숙이 아픔이 느껴집니다."
 
 #. ~ Remove message for effect(s) 'Damaged Soul'.
 #: data/mods/rpg_system/system_interface.json
 msgid "The spiritual damage heals."
-msgstr ""
+msgstr "영혼의 상처가 치유되었습니다."
 
 #: data/mods/rpg_system/traits.json
 msgid "[Warrior]"
-msgstr ""
+msgstr "[전사]"
 
 #. ~ Description for [Warrior]
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Through rigorous training, you've honed your body. Your endurance is "
-"exceptional, you never tire. Every 5 minutes: reduce fatigue, increase "
-"stamina. Per level: +0.55 STR, +0.2 DEX, +0.1 INT, +0.15 PER"
+"exceptional, you tire slowly. Every 5 minutes increase stamina. Per level: "
+"+0.55 STR, +0.2 DEX, +0.1 INT, +0.15 PER"
 msgstr ""
+"엄격한 훈련을 통해 몸을 단련했습니다. 맷집이 뛰어나며, 피로가 느리게 쌓입니다. 5분마다 지구력이 증가합니다. 레벨당: 힘 +0.55,"
+" 민첩 +0.2, 지능 +0.1, 지각력 +0.15"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Berserker]"
-msgstr ""
+msgstr "[광전사]"
 
 #. ~ Description for [Berserker]
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Rage fuels your strikes. Your fury makes you strike 15% faster. Your "
-"endurance is exceptional, you never tire. Every 5 minutes: reduce fatigue, "
-"increase stamina. Per level: +0.75 STR, +0.45 DEX, +0.1 INT, +0.2 PER"
+"endurance is exceptional, you tire slowly. Every 5 minutes increase stamina."
+" Per level: +0.75 STR, +0.45 DEX, +0.1 INT, +0.2 PER"
 msgstr ""
+"분노는 공격의 연료입니다. 격노로 공격 속도가 15% 증가합니다. 당신의 맷집은 탁월하며, 피로가 느리게 쌓입니다. 5분마다 지구력이 "
+"증가합니다. 레벨당: 힘 +0.75, 민첩 +0.45, 지능 +0.1, 지각력 +0.2"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Guardian]"
-msgstr ""
+msgstr "[수호자]"
 
 #. ~ Description for [Guardian]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"A living shield, protecting all. Your skin is naturally armored (+3 physical"
-" armor). Your endurance is exceptional, you never tire. Every 5 minutes: "
-"reduce fatigue, increase stamina. Per level: +0.6 STR, +0.15 DEX, +0.15 INT,"
-" +0.6 PER"
+"A living shield, protecting all. Your skin is naturally armored (+4 physical"
+" armor). Your endurance is exceptional, you tire slowly. Every 5 minutes "
+"increase stamina. Per level: +0.6 STR, +0.15 DEX, +0.15 INT, +0.6 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Mage]"
-msgstr ""
+msgstr "[마법사]"
 
 #. ~ Description for [Mage]
 #: data/mods/rpg_system/traits.json
@@ -226985,7 +227008,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Mystic]"
-msgstr ""
+msgstr "[신비술사]"
 
 #. ~ Description for [Mystic]
 #: data/mods/rpg_system/traits.json
@@ -226997,56 +227020,99 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Scholar]"
-msgstr ""
+msgstr "[학자]"
 
 #. ~ Description for [Scholar]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Knowledge is your greatest weapon. Your hands work with supernatural speed "
-"(+25% crafting speed, +50% reading speed). Moderate mana reserves (+800 "
-"mana, +20% mana regen). Per level: +0.1 STR, +0.3 DEX, +0.8 INT, +0.3 PER"
+"Knowledge flows to you effortlessly. You read with supernatural "
+"comprehension (+100% reading speed). Moderate mana reserves (+800 mana, +20%"
+" mana regen). Per level: +0.05 STR, +0.15 DEX, +0.8 INT, +0.5 PER"
+msgstr ""
+
+#: data/mods/rpg_system/traits.json
+msgid "[Rogue]"
+msgstr "[도적]"
+
+#. ~ Description for [Rogue]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Cunning and dexterous. A master of finesse and guile. Per level: +0.1 STR, "
+"+0.55 DEX, +0.15 INT, +0.2 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Scout]"
-msgstr ""
+msgstr "[정찰병]"
 
 #. ~ Description for [Scout]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Swift and aware. Your movements are unnaturally fast (5% faster movement, +1"
-" speed per level). Per level: +0.1 STR, +0.55 DEX, +0.05 INT, +0.3 PER"
+"Master tracker and observer. Your senses are razor sharp. Your movements are"
+" unnaturally fast (5% faster movement, +1 speed per level). Per level: +0.15"
+" STR, +0.3 DEX, +0.05 INT, +0.5 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
-msgid "[Ranger]"
-msgstr ""
+msgid "[Acrobat]"
+msgstr "[곡예]"
 
-#. ~ Description for [Ranger]
+#. ~ Description for [Acrobat]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Master of the wilds. You see clearly in darkness (night vision 20 tiles). "
-"You never need water (heavy thirst reduction every 5 min). Your movements "
-"are unnaturally fast (8% faster movement, +1 speed per level). Per level: "
-"+0.15 STR, +0.65 DEX, +0.1 INT, +0.6 PER"
+"A blur of graceful motion. Your reflexes are supernatural (+6 dodge bonus). "
+"Your movements flow with impossible speed (8% faster movement, +1.5 speed "
+"per level). Per level: +0.1 STR, +0.8 DEX, +0.2 INT, +0.4 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Assassin]"
-msgstr ""
+msgstr "[암살자]"
 
 #. ~ Description for [Assassin]
 #: data/mods/rpg_system/traits.json
 msgid ""
 "A shadow striking without warning. You move in complete silence (-40% noise,"
 " +30% hearing). You are nearly invisible (+50% stealth). Your movements blur"
-" with supernatural speed (12% faster movement, +5% speed multiplier, +2 "
-"speed per level). Per level: +0.1 STR, +0.75 DEX, +0.35 INT, +0.3 PER"
+" with supernatural speed (8% faster movement, +1.5 speed per level). Per "
+"level: +0.1 STR, +0.75 DEX, +0.35 INT, +0.3 PER"
 msgstr ""
+"예고없이 닥쳐드는 그림자입니다. 소음 유뱔량이 40%만큼 감소하고, 청각이 30%만큼 향상됩니다. 은밀이 50%만큼 증가하며, 이동력이 "
+"8%만큼 증가합니다. 레벨당 속도 +1.5, 체력 +0.1, 민첩성 +0.75, 지능 +0.35, 지각력 +0.3 보너스를 얻습니다."
+
+#: data/mods/rpg_system/traits.json
+msgid "[Ranger]"
+msgstr "[순찰자]"
+
+#. ~ Description for [Ranger]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Master sharpshooter with perfect aim. You see clearly in darkness (night "
+"vision 20 tiles). You require less water (half at level 10, none at 20). "
+"Your movements are unnaturally fast (5% faster movement, +1 speed per "
+"level). Per level: +0.15 STR, +0.45 DEX, +0.1 INT, +0.8 PER"
+msgstr ""
+"완벽한 조준실력을 갖춘 명사수입니다. 야간시야 20타일을 얻으며, 물 필요량이 레벨 10에 절반만큼 줄어들고 레벨 20에 완전히 "
+"사라집니다. 이동력이 5%만큼 증가합니다. 레벨당 체력 +0.15, 민첩성 +0.45, 지능 +0.1, 지각력 +0.8 보너스를 "
+"얻습니다."
+
+#: data/mods/rpg_system/traits.json
+msgid "[Craftsman]"
+msgstr "[제작자]"
+
+#. ~ Description for [Craftsman]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Master of all trades. Your skilled hands work with incredible precision (+1 "
+"to all crafting skills, +40% crafting speed). Per level: +0.2 STR, +0.3 DEX,"
+" +0.4 INT, +0.6 PER"
+msgstr ""
+"뭐든지 잘합니다. 모든 제작 기술이 1만큼 증가하고, 제작 속도에 40% 보너스를 받습니다. 레벨당 체력 +0.2, 민첩성 +0.3, "
+"지능 +0.4, 지각력 +0.6 보너스를 얻습니다."
 
 #: data/mods/rpg_system/traits.json
 msgid "[Bionic Symbiote]"
-msgstr ""
+msgstr "[바이오닉 공생체]"
 
 #. ~ Description for [Bionic Symbiote]
 #: data/mods/rpg_system/traits.json
@@ -227057,18 +227123,18 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Vital Essence]"
-msgstr ""
+msgstr "[생명의 정수]"
 
 #. ~ Description for [Vital Essence]
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Life energy flows through you. You are perpetually healthy and healing "
-"(increases health by 0.1 per level every 5 minutes)."
-msgstr ""
+"(increases health by 0.02 per level every 5 minutes)."
+msgstr "생명의 힘이 당신에게 흐릅니다. 매 5분마다 건강 수치가 레벨당 0.02씩 증가합니다."
 
 #: data/mods/rpg_system/traits.json
 msgid "[Purifying Blood]"
-msgstr ""
+msgstr "[정화의 피]"
 
 #. ~ Description for [Purifying Blood]
 #: data/mods/rpg_system/traits.json
@@ -227079,7 +227145,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Resistant Skin]"
-msgstr ""
+msgstr "[저항성 피부]"
 
 #. ~ Description for [Resistant Skin]
 #: data/mods/rpg_system/traits.json
@@ -227090,18 +227156,18 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Lightweight Frame]"
-msgstr ""
+msgstr "[경량 골격]"
 
 #. ~ Description for [Lightweight Frame]
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Your body is optimized for speed over strength. You move much faster but "
-"can't carry as much (15% faster movement, 25% less carry capacity)."
-msgstr ""
+"can't carry as much (25% faster movement, 25% less carry capacity)."
+msgstr "당신의 몸은 근력보다 속도를 중시해 최적화되었습니다. 이동력이 25% 증가하지만, 운반 용량이 25% 감소합니다."
 
 #: data/mods/rpg_system/traits.json
 msgid "[Strong Back]"
-msgstr ""
+msgstr "[강인한 등]"
 
 #. ~ Description for [Strong Back]
 #: data/mods/rpg_system/traits.json
@@ -227112,7 +227178,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Tireless]"
-msgstr ""
+msgstr "[불요불굴]"
 
 #. ~ Description for [Tireless]
 #: data/mods/rpg_system/traits.json
@@ -227123,7 +227189,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Mana Font]"
-msgstr ""
+msgstr "[마나의 샘]"
 
 #. ~ Description for [Mana Font]
 #: data/mods/rpg_system/traits.json
@@ -227134,7 +227200,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Blink Step]"
-msgstr ""
+msgstr "[깜빡이 걸음]"
 
 #. ~ Description for [Blink Step]
 #: data/mods/rpg_system/traits.json
@@ -227145,7 +227211,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Natural Healer]"
-msgstr ""
+msgstr "[자연적 치유]"
 
 #. ~ Description for [Natural Healer]
 #: data/mods/rpg_system/traits.json
@@ -227156,7 +227222,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Adaptive Biology]"
-msgstr ""
+msgstr "[적응성 생명]"
 
 #. ~ Description for [Adaptive Biology]
 #: data/mods/rpg_system/traits.json
@@ -227167,7 +227233,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Glass Cannon]"
-msgstr ""
+msgstr "[유리 대포]"
 
 #. ~ Description for [Glass Cannon]
 #: data/mods/rpg_system/traits.json
@@ -227178,7 +227244,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Juggernaut]"
-msgstr ""
+msgstr "[거대괴수]"
 
 #. ~ Description for [Juggernaut]
 #: data/mods/rpg_system/traits.json
@@ -227190,7 +227256,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Arcane Battery]"
-msgstr ""
+msgstr "[비전 충전지]"
 
 #. ~ Description for [Arcane Battery]
 #: data/mods/rpg_system/traits.json
@@ -227201,7 +227267,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Iron Fists]"
-msgstr ""
+msgstr "[강철 주먹]"
 
 #. ~ Description for [Iron Fists]
 #: data/mods/rpg_system/traits.json
@@ -227212,7 +227278,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Efficient Metabolism]"
-msgstr ""
+msgstr "[효율적 신진대사]"
 
 #. ~ Description for [Efficient Metabolism]
 #: data/mods/rpg_system/traits.json
@@ -227223,17 +227289,13 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Combat Reflexes]"
-msgstr ""
+msgstr "[전투 반사신경]"
 
 #. ~ Description for [Combat Reflexes]
 #: data/mods/rpg_system/traits.json
 msgid ""
 "You react instantly to threats. Your reflexes grant superior evasion (+3 "
 "dodge bonus)."
-msgstr ""
-
-#: data/mods/rpg_system/traits.json
-msgid "[Acrobat]"
 msgstr ""
 
 #. ~ Description for [Acrobat]
@@ -227245,7 +227307,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Tireless Worker]"
-msgstr ""
+msgstr "[불굴의 노동자]"
 
 #. ~ Description for [Tireless Worker]
 #: data/mods/rpg_system/traits.json
@@ -227256,7 +227318,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Rapid Metabolism]"
-msgstr ""
+msgstr "[신속한 신진대사]"
 
 #. ~ Description for [Rapid Metabolism]
 #: data/mods/rpg_system/traits.json
@@ -227267,7 +227329,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Scentless]"
-msgstr ""
+msgstr "[무취]"
 
 #. ~ Description for [Scentless]
 #: data/mods/rpg_system/traits.json
@@ -227278,7 +227340,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Clotting Factor]"
-msgstr ""
+msgstr "[지혈 인자]"
 
 #. ~ Description for [Clotting Factor]
 #: data/mods/rpg_system/traits.json
@@ -227289,7 +227351,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Regenerator]"
-msgstr ""
+msgstr "[재생기]"
 
 #. ~ Description for [Regenerator]
 #: data/mods/rpg_system/traits.json
@@ -227300,7 +227362,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Master Craftsman]"
-msgstr ""
+msgstr "[탁월한 제작자]"
 
 #. ~ Description for [Master Craftsman]
 #: data/mods/rpg_system/traits.json
@@ -227311,7 +227373,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Pack Rat]"
-msgstr ""
+msgstr "[수집광]"
 
 #. ~ Description for [Pack Rat]
 #: data/mods/rpg_system/traits.json
@@ -227321,7 +227383,7 @@ msgstr ""
 
 #: data/mods/rpg_system/traits.json
 msgid "[Creature Harvester]"
-msgstr ""
+msgstr "[개체 수확자]"
 
 #. ~ Description for [Creature Harvester]
 #: data/mods/rpg_system/traits.json
@@ -227329,6 +227391,17 @@ msgid ""
 "You instinctively know how to harvest creatures. You can efficiently harvest"
 " materials with your bare hands (butchering quality 40)."
 msgstr ""
+
+#: data/mods/rpg_system/traits.json
+msgid "[Vampiric]"
+msgstr "[흡혈귀]"
+
+#. ~ Description for [Vampiric]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"You drain life essence from your foes. Heal for 0.5% of monster's max HP per"
+" level (minimum 1 HP) on kill."
+msgstr "당신은 적의 생명의 정수를 흡수할 수 있습니다. 적을 쓰러뜨리면 레벨당 괴물의 최대 HP의 0.5%만큼 회복합니다."
 
 #: data/mods/saveload_lua_test/modinfo.json
 msgid "SaveLoad Lua Test"

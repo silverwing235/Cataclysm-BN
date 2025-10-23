@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cataclysm-bn\n"
-"POT-Creation-Date: 2025-10-20 01:36+0000\n"
+"POT-Creation-Date: 2025-10-22 01:36+0000\n"
 "Last-Translator: Raina Lute, 2024\n"
 "Language-Team: Turkish (https://app.transifex.com/bn-team/teams/113585/tr/)\n"
 "MIME-Version: 1.0\n"
@@ -68852,6 +68852,20 @@ msgid ""
 "A heavy composite shield used by SWAT teams and other armed forces.  It can "
 "handle the occasional pistol bullet, but its heavy-duty nature means it's "
 "quite encumbering and doesn't cover the legs very well."
+msgstr ""
+
+#: data/json/items/armor/shields.json
+msgid "large ballistic shield"
+msgid_plural "large ballistic shields"
+msgstr[0] ""
+msgstr[1] ""
+
+#. ~ Description for {'str': 'large ballistic shield'}
+#: data/json/items/armor/shields.json
+msgid ""
+"A tall composite shield used by SWAT teams and other armed forces, rated for"
+" pistol bullets.  Covers the body and legs quite well, but is much heavier "
+"and more encumbering than lighter models."
 msgstr ""
 
 #: data/json/items/armor/shields.json
@@ -222830,6 +222844,10 @@ msgid ""
 msgstr ""
 
 #: data/mods/rpg_system/system_interface.json
+msgid "Your soul burns and aches"
+msgstr ""
+
+#: data/mods/rpg_system/system_interface.json
 msgid "Damaged Soul"
 msgstr ""
 
@@ -222858,8 +222876,8 @@ msgstr ""
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Through rigorous training, you've honed your body. Your endurance is "
-"exceptional, you never tire. Every 5 minutes: reduce fatigue, increase "
-"stamina. Per level: +0.55 STR, +0.2 DEX, +0.1 INT, +0.15 PER"
+"exceptional, you tire slowly. Every 5 minutes increase stamina. Per level: "
+"+0.55 STR, +0.2 DEX, +0.1 INT, +0.15 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -222870,8 +222888,8 @@ msgstr ""
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Rage fuels your strikes. Your fury makes you strike 15% faster. Your "
-"endurance is exceptional, you never tire. Every 5 minutes: reduce fatigue, "
-"increase stamina. Per level: +0.75 STR, +0.45 DEX, +0.1 INT, +0.2 PER"
+"endurance is exceptional, you tire slowly. Every 5 minutes increase stamina."
+" Per level: +0.75 STR, +0.45 DEX, +0.1 INT, +0.2 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -222881,10 +222899,9 @@ msgstr ""
 #. ~ Description for [Guardian]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"A living shield, protecting all. Your skin is naturally armored (+3 physical"
-" armor). Your endurance is exceptional, you never tire. Every 5 minutes: "
-"reduce fatigue, increase stamina. Per level: +0.6 STR, +0.15 DEX, +0.15 INT,"
-" +0.6 PER"
+"A living shield, protecting all. Your skin is naturally armored (+4 physical"
+" armor). Your endurance is exceptional, you tire slowly. Every 5 minutes "
+"increase stamina. Per level: +0.6 STR, +0.15 DEX, +0.15 INT, +0.6 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -222917,9 +222934,20 @@ msgstr ""
 #. ~ Description for [Scholar]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Knowledge is your greatest weapon. Your hands work with supernatural speed "
-"(+25% crafting speed, +50% reading speed). Moderate mana reserves (+800 "
-"mana, +20% mana regen). Per level: +0.1 STR, +0.3 DEX, +0.8 INT, +0.3 PER"
+"Knowledge flows to you effortlessly. You read with supernatural "
+"comprehension (+100% reading speed). Moderate mana reserves (+800 mana, +20%"
+" mana regen). Per level: +0.05 STR, +0.15 DEX, +0.8 INT, +0.5 PER"
+msgstr ""
+
+#: data/mods/rpg_system/traits.json
+msgid "[Rogue]"
+msgstr ""
+
+#. ~ Description for [Rogue]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Cunning and dexterous. A master of finesse and guile. Per level: +0.1 STR, "
+"+0.55 DEX, +0.15 INT, +0.2 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -222929,21 +222957,21 @@ msgstr ""
 #. ~ Description for [Scout]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Swift and aware. Your movements are unnaturally fast (5% faster movement, +1"
-" speed per level). Per level: +0.1 STR, +0.55 DEX, +0.05 INT, +0.3 PER"
+"Master tracker and observer. Your senses are razor sharp. Your movements are"
+" unnaturally fast (5% faster movement, +1 speed per level). Per level: +0.15"
+" STR, +0.3 DEX, +0.05 INT, +0.5 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
-msgid "[Ranger]"
+msgid "[Acrobat]"
 msgstr ""
 
-#. ~ Description for [Ranger]
+#. ~ Description for [Acrobat]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Master of the wilds. You see clearly in darkness (night vision 20 tiles). "
-"You never need water (heavy thirst reduction every 5 min). Your movements "
-"are unnaturally fast (8% faster movement, +1 speed per level). Per level: "
-"+0.15 STR, +0.65 DEX, +0.1 INT, +0.6 PER"
+"A blur of graceful motion. Your reflexes are supernatural (+6 dodge bonus). "
+"Your movements flow with impossible speed (8% faster movement, +1.5 speed "
+"per level). Per level: +0.1 STR, +0.8 DEX, +0.2 INT, +0.4 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -222955,8 +222983,33 @@ msgstr ""
 msgid ""
 "A shadow striking without warning. You move in complete silence (-40% noise,"
 " +30% hearing). You are nearly invisible (+50% stealth). Your movements blur"
-" with supernatural speed (12% faster movement, +5% speed multiplier, +2 "
-"speed per level). Per level: +0.1 STR, +0.75 DEX, +0.35 INT, +0.3 PER"
+" with supernatural speed (8% faster movement, +1.5 speed per level). Per "
+"level: +0.1 STR, +0.75 DEX, +0.35 INT, +0.3 PER"
+msgstr ""
+
+#: data/mods/rpg_system/traits.json
+msgid "[Ranger]"
+msgstr ""
+
+#. ~ Description for [Ranger]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Master sharpshooter with perfect aim. You see clearly in darkness (night "
+"vision 20 tiles). You require less water (half at level 10, none at 20). "
+"Your movements are unnaturally fast (5% faster movement, +1 speed per "
+"level). Per level: +0.15 STR, +0.45 DEX, +0.1 INT, +0.8 PER"
+msgstr ""
+
+#: data/mods/rpg_system/traits.json
+msgid "[Craftsman]"
+msgstr ""
+
+#. ~ Description for [Craftsman]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Master of all trades. Your skilled hands work with incredible precision (+1 "
+"to all crafting skills, +40% crafting speed). Per level: +0.2 STR, +0.3 DEX,"
+" +0.4 INT, +0.6 PER"
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -222978,7 +223031,7 @@ msgstr ""
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Life energy flows through you. You are perpetually healthy and healing "
-"(increases health by 0.1 per level every 5 minutes)."
+"(increases health by 0.02 per level every 5 minutes)."
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -223011,7 +223064,7 @@ msgstr ""
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Your body is optimized for speed over strength. You move much faster but "
-"can't carry as much (15% faster movement, 25% less carry capacity)."
+"can't carry as much (25% faster movement, 25% less carry capacity)."
 msgstr ""
 
 #: data/mods/rpg_system/traits.json
@@ -223147,10 +223200,6 @@ msgid ""
 "dodge bonus)."
 msgstr ""
 
-#: data/mods/rpg_system/traits.json
-msgid "[Acrobat]"
-msgstr ""
-
 #. ~ Description for [Acrobat]
 #: data/mods/rpg_system/traits.json
 msgid ""
@@ -223243,6 +223292,17 @@ msgstr ""
 msgid ""
 "You instinctively know how to harvest creatures. You can efficiently harvest"
 " materials with your bare hands (butchering quality 40)."
+msgstr ""
+
+#: data/mods/rpg_system/traits.json
+msgid "[Vampiric]"
+msgstr ""
+
+#. ~ Description for [Vampiric]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"You drain life essence from your foes. Heal for 0.5% of monster's max HP per"
+" level (minimum 1 HP) on kill."
 msgstr ""
 
 #: data/mods/saveload_lua_test/modinfo.json

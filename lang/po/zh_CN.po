@@ -15,7 +15,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cataclysm-bn\n"
-"POT-Creation-Date: 2025-10-20 01:36+0000\n"
+"POT-Creation-Date: 2025-10-22 01:36+0000\n"
 "Last-Translator: Jeremy Wu <jeremy7986111@yahoo.com.tw>, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/bn-team/teams/113585/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -67979,6 +67979,20 @@ msgid ""
 "handle the occasional pistol bullet, but its heavy-duty nature means it's "
 "quite encumbering and doesn't cover the legs very well."
 msgstr "一种由特警队和其他武装部队使用的重型复合材料盾牌。它能够抵挡偶然射出的手枪子弹，但其重型设计使其相当笨重，且对腿部保护不够完善。"
+
+#: data/json/items/armor/shields.json
+msgid "large ballistic shield"
+msgid_plural "large ballistic shields"
+msgstr[0] "大型防弹盾牌"
+
+#. ~ Description for {'str': 'large ballistic shield'}
+#: data/json/items/armor/shields.json
+msgid ""
+"A tall composite shield used by SWAT teams and other armed forces, rated for"
+" pistol bullets.  Covers the body and legs quite well, but is much heavier "
+"and more encumbering than lighter models."
+msgstr ""
+"一种由特警队和其他武装部队使用的高大复合材料盾牌，防护等级可抵御手枪子弹。它能很好地为身体和腿部提供掩护，但与轻型盾牌相比要重得多，也更笨重。"
 
 #: data/json/items/armor/shields.json
 msgid "leather-reinforced shield"
@@ -218783,6 +218797,10 @@ msgid ""
 msgstr "一个允许你访问[系统]的神秘界面。它在系统初始化时凭空出现在你的手中。"
 
 #: data/mods/rpg_system/system_interface.json
+msgid "Your soul burns and aches"
+msgstr "你的灵魂在燃烧与痛苦中挣扎"
+
+#: data/mods/rpg_system/system_interface.json
 msgid "Damaged Soul"
 msgstr "受损的灵魂"
 
@@ -218811,10 +218829,10 @@ msgstr "[战士]"
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Through rigorous training, you've honed your body. Your endurance is "
-"exceptional, you never tire. Every 5 minutes: reduce fatigue, increase "
-"stamina. Per level: +0.55 STR, +0.2 DEX, +0.1 INT, +0.15 PER"
+"exceptional, you tire slowly. Every 5 minutes increase stamina. Per level: "
+"+0.55 STR, +0.2 DEX, +0.1 INT, +0.15 PER"
 msgstr ""
-"通过严酷的训练，你磨砺了你的身体。你的耐力超凡，永不疲倦。每5分钟：减少疲劳，增加耐力。每级：+0.55力量，+0.2敏捷，+0.1智力，+0.15感知"
+"通过严酷的训练，你磨砺了你的身体。你的耐力超乎寻常，不易疲劳。每5分钟增加一次体力。每级：+0.55力量，+0.2敏捷，+0.1智力，+0.15感知"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Berserker]"
@@ -218824,10 +218842,10 @@ msgstr "[狂战士]"
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Rage fuels your strikes. Your fury makes you strike 15% faster. Your "
-"endurance is exceptional, you never tire. Every 5 minutes: reduce fatigue, "
-"increase stamina. Per level: +0.75 STR, +0.45 DEX, +0.1 INT, +0.2 PER"
+"endurance is exceptional, you tire slowly. Every 5 minutes increase stamina."
+" Per level: +0.75 STR, +0.45 DEX, +0.1 INT, +0.2 PER"
 msgstr ""
-"怒火为你每次攻击注入力量。你的狂怒使你的攻击速度提高15%。你的耐力超凡，永不疲倦。每5分钟：减少疲劳，增加耐力。每级：+0.75力量，+0.45敏捷，+0.1智力，+0.2感知"
+"怒火为你每次攻击注入力量。你的狂怒使你的攻击速度提高15%。你的耐力超乎寻常，不易疲劳。每5分钟增加一次体力。每级：+0.75力量，+0.45敏捷，+0.1智力，+0.2感知"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Guardian]"
@@ -218836,12 +218854,11 @@ msgstr "[守护者]"
 #. ~ Description for [Guardian]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"A living shield, protecting all. Your skin is naturally armored (+3 physical"
-" armor). Your endurance is exceptional, you never tire. Every 5 minutes: "
-"reduce fatigue, increase stamina. Per level: +0.6 STR, +0.15 DEX, +0.15 INT,"
-" +0.6 PER"
+"A living shield, protecting all. Your skin is naturally armored (+4 physical"
+" armor). Your endurance is exceptional, you tire slowly. Every 5 minutes "
+"increase stamina. Per level: +0.6 STR, +0.15 DEX, +0.15 INT, +0.6 PER"
 msgstr ""
-"一面活着的盾牌，守护一切。你的皮肤天生带有护甲（+3物理护甲）。你的耐力超凡，永不疲倦。每5分钟：减少疲劳，增加耐力。每级：+0.6力量，+0.15敏捷，+0.15智力，+0.6感知"
+"一面活着的盾牌，守护一切。你的皮肤天生带有护甲（+4物理护甲）。你的耐力超乎寻常，不易疲劳。每5分钟增加一次体力。每级：+0.6力量，+0.15敏捷，+0.15智力，+0.6感知"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Mage]"
@@ -218875,11 +218892,23 @@ msgstr "[学者]"
 #. ~ Description for [Scholar]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Knowledge is your greatest weapon. Your hands work with supernatural speed "
-"(+25% crafting speed, +50% reading speed). Moderate mana reserves (+800 "
-"mana, +20% mana regen). Per level: +0.1 STR, +0.3 DEX, +0.8 INT, +0.3 PER"
+"Knowledge flows to you effortlessly. You read with supernatural "
+"comprehension (+100% reading speed). Moderate mana reserves (+800 mana, +20%"
+" mana regen). Per level: +0.05 STR, +0.15 DEX, +0.8 INT, +0.5 PER"
 msgstr ""
-"知识是你最强大的武器。你的双手以超自然的速度工作（+25%制作速度，+50%阅读速度）。拥有中等法力储备（+800法力，+20%法力恢复）。每级：+0.1力量，+0.3敏捷，+0.8智力，+0.3感知"
+"知识向你奔涌而来。你拥有超凡的理解力（+100% 阅读速度）。拥有中等的法力储备（+800 法力值，+20% 法力恢复速度）。每级：+0.05 "
+"力量，+0.15 敏捷，+0.8 智力，+0.5 感知"
+
+#: data/mods/rpg_system/traits.json
+msgid "[Rogue]"
+msgstr "[盗贼]"
+
+#. ~ Description for [Rogue]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Cunning and dexterous. A master of finesse and guile. Per level: +0.1 STR, "
+"+0.55 DEX, +0.15 INT, +0.2 PER"
+msgstr "狡猾而敏捷。一位精于技巧与诡计的大师。每级：+0.1 力量，+0.55 敏捷，+0.15 智力，+0.2 感知"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Scout]"
@@ -218888,23 +218917,26 @@ msgstr "[斥候]"
 #. ~ Description for [Scout]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Swift and aware. Your movements are unnaturally fast (5% faster movement, +1"
-" speed per level). Per level: +0.1 STR, +0.55 DEX, +0.05 INT, +0.3 PER"
-msgstr "迅捷而警觉。你的行动快得异乎寻常（+5%移动速度，每级+1速度）。每级：+0.1力量，+0.55敏捷，+0.05智力，+0.3感知"
+"Master tracker and observer. Your senses are razor sharp. Your movements are"
+" unnaturally fast (5% faster movement, +1 speed per level). Per level: +0.15"
+" STR, +0.3 DEX, +0.05 INT, +0.5 PER"
+msgstr ""
+"追踪与观察的大师。你的感官如剃刀般锋利。你的移动速度异乎寻常（+5% 移动速度，每级+1 速度）。每级：+0.15 力量，+0.3 敏捷，+0.05 "
+"智力，+0.5 感知"
 
 #: data/mods/rpg_system/traits.json
-msgid "[Ranger]"
-msgstr "[游侠]"
+msgid "[Acrobat]"
+msgstr "[杂技演员]"
 
-#. ~ Description for [Ranger]
+#. ~ Description for [Acrobat]
 #: data/mods/rpg_system/traits.json
 msgid ""
-"Master of the wilds. You see clearly in darkness (night vision 20 tiles). "
-"You never need water (heavy thirst reduction every 5 min). Your movements "
-"are unnaturally fast (8% faster movement, +1 speed per level). Per level: "
-"+0.15 STR, +0.65 DEX, +0.1 INT, +0.6 PER"
+"A blur of graceful motion. Your reflexes are supernatural (+6 dodge bonus). "
+"Your movements flow with impossible speed (8% faster movement, +1.5 speed "
+"per level). Per level: +0.1 STR, +0.8 DEX, +0.2 INT, +0.4 PER"
 msgstr ""
-"荒野大师。你在黑暗中看得一清二楚（20格夜视范围）。你从不需要喝水（每5分钟大幅降低口渴度）。你的行动快得异乎寻常（+8%移动速度，每级+1速度）。每级：+0.15力量，+0.65敏捷，+0.1智力，+0.6感知"
+"优雅的身形快如幻影。你拥有超自然的反应能力（+6 闪避加成）。你的动作迅捷无比，如行云流水（+8% 移动速度，每级+1.5 速度）。每级：+0.1 "
+"力量，+0.8 敏捷，+0.2 智力，+0.4 感知"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Assassin]"
@@ -218915,10 +218947,40 @@ msgstr "[刺客]"
 msgid ""
 "A shadow striking without warning. You move in complete silence (-40% noise,"
 " +30% hearing). You are nearly invisible (+50% stealth). Your movements blur"
-" with supernatural speed (12% faster movement, +5% speed multiplier, +2 "
-"speed per level). Per level: +0.1 STR, +0.75 DEX, +0.35 INT, +0.3 PER"
+" with supernatural speed (8% faster movement, +1.5 speed per level). Per "
+"level: +0.1 STR, +0.75 DEX, +0.35 INT, +0.3 PER"
 msgstr ""
-"毫无征兆地出击的暗影。你行动时悄无声息（-40%噪音，+30%听力）。你近乎隐形（+50%潜行）。你的动作快如鬼魅，迅捷无比（+12%移动速度，+5%速度倍率，每级+2速度）。每级：+0.1力量，+0.75敏捷，+0.35智力，+0.3感知"
+"毫无征兆地出击的暗影。你行动时悄无声息（-40%噪音，+30%听力）。你近乎隐形（+50%潜行）。你的动作快如鬼魅，迅捷无比（+8% "
+"移动速度，每级+1.5 速度）。每级：+0.1力量，+0.75敏捷，+0.35智力，+0.3感知"
+
+#: data/mods/rpg_system/traits.json
+msgid "[Ranger]"
+msgstr "[游侠]"
+
+#. ~ Description for [Ranger]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Master sharpshooter with perfect aim. You see clearly in darkness (night "
+"vision 20 tiles). You require less water (half at level 10, none at 20). "
+"Your movements are unnaturally fast (5% faster movement, +1 speed per "
+"level). Per level: +0.15 STR, +0.45 DEX, +0.1 INT, +0.8 PER"
+msgstr ""
+"拥有完美准星的神射手。你在黑暗中也能看得一清二楚（夜视能力 20 格）。你对水的需求更少（10级时减半，20级时无需饮水）。你的移动速度异乎寻常（+5%"
+" 移动速度，每级+1 速度）。每级：+0.15 力量，+0.45 敏捷，+0.1 智力，+0.8 感知"
+
+#: data/mods/rpg_system/traits.json
+msgid "[Craftsman]"
+msgstr "[工匠]"
+
+#. ~ Description for [Craftsman]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"Master of all trades. Your skilled hands work with incredible precision (+1 "
+"to all crafting skills, +40% crafting speed). Per level: +0.2 STR, +0.3 DEX,"
+" +0.4 INT, +0.6 PER"
+msgstr ""
+"百工之王。你灵巧的双手能以惊人的精度进行工作（所有制造技能+1，+40% 制造速度）。每级：+0.2 力量，+0.3 敏捷，+0.4 智力，+0.6 "
+"感知"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Bionic Symbiote]"
@@ -218939,8 +219001,8 @@ msgstr "[生命精粹]"
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Life energy flows through you. You are perpetually healthy and healing "
-"(increases health by 0.1 per level every 5 minutes)."
-msgstr "生命能量在你体内流淌。你永远保持健康并持续自愈（每5分钟增加 0.1生命值/每级）。"
+"(increases health by 0.02 per level every 5 minutes)."
+msgstr "生命能量在你体内流淌。你永远保持健康并持续自愈（每5分钟增加 0.02生命值/每级）。"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Purifying Blood]"
@@ -218972,8 +219034,8 @@ msgstr "[轻盈骨架]"
 #: data/mods/rpg_system/traits.json
 msgid ""
 "Your body is optimized for speed over strength. You move much faster but "
-"can't carry as much (15% faster movement, 25% less carry capacity)."
-msgstr "你的身体为速度而非力量进行了优化。你移动得更快，但负重能力更低（+15%移动速度，-25%负重能力）。"
+"can't carry as much (25% faster movement, 25% less carry capacity)."
+msgstr "你的身体为速度而非力量进行了优化。你移动得更快，但负重能力更低（+25%移动速度，-25%负重能力）。"
 
 #: data/mods/rpg_system/traits.json
 msgid "[Strong Back]"
@@ -219108,10 +219170,6 @@ msgid ""
 "dodge bonus)."
 msgstr "你能对威胁做出即时反应。你的反射神经带来了卓越的闪避能力（+3闪避加成）。"
 
-#: data/mods/rpg_system/traits.json
-msgid "[Acrobat]"
-msgstr "[杂技演员]"
-
 #. ~ Description for [Acrobat]
 #: data/mods/rpg_system/traits.json
 msgid ""
@@ -219187,7 +219245,7 @@ msgstr "你的双手善于创造。你的制作速度加快20%，建造速度加
 
 #: data/mods/rpg_system/traits.json
 msgid "[Pack Rat]"
-msgstr "[仓鼠党]"
+msgstr "[囤积狂]"
 
 #. ~ Description for [Pack Rat]
 #: data/mods/rpg_system/traits.json
@@ -219205,6 +219263,17 @@ msgid ""
 "You instinctively know how to harvest creatures. You can efficiently harvest"
 " materials with your bare hands (butchering quality 40)."
 msgstr "你本能地知道如何从生物身上获取材料。你能用双手高效地收割材料（屠宰品质40）。"
+
+#: data/mods/rpg_system/traits.json
+msgid "[Vampiric]"
+msgstr "[吸血]"
+
+#. ~ Description for [Vampiric]
+#: data/mods/rpg_system/traits.json
+msgid ""
+"You drain life essence from your foes. Heal for 0.5% of monster's max HP per"
+" level (minimum 1 HP) on kill."
+msgstr "你从敌人身上吸取生命精华。每次击杀时，恢复生命值，恢复量为怪物最大生命值的 0.5% x 等级（最低 1 点生命值）。"
 
 #: data/mods/saveload_lua_test/modinfo.json
 msgid "SaveLoad Lua Test"
